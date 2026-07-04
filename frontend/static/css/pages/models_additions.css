@@ -1,0 +1,219 @@
+/* Model Interactions */
+.model-detail-card {
+    transition: all 0.2s;
+    cursor: default;
+    position: relative;
+    border: 2px solid transparent;
+}
+
+.selected-card {
+    border-color: #3182ce;
+    background: #ebf8ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(49, 130, 206, 0.2);
+}
+
+.selection-checkbox {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: white;
+    padding: 0.25rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+/* Modals */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.modal-card {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: scaleIn 0.2s ease-out;
+}
+
+.modal-card.wide {
+    max-width: 800px;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #2d3748;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #a0aec0;
+}
+
+.close-btn:hover {
+    color: #e53e3e;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    max-height: 80vh;
+}
+
+/* Inspector Grid */
+.inspector-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.inspector-item label {
+    display: block;
+    font-size: 0.75rem;
+    color: #718096;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.inspector-item span {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #2d3748;
+}
+
+.quant-bar {
+    width: 100%;
+    height: 24px;
+    background: #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    margin-top: 0.5rem;
+}
+
+.quant-bar .fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3182ce, #63b3ed);
+}
+
+.quant-bar span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    font-weight: 600;
+}
+
+/* Comparison View */
+.comparison-body {
+    display: flex;
+    gap: 2rem;
+    align-items: stretch;
+}
+
+.compare-col {
+    flex: 1;
+    text-align: center;
+}
+
+.compare-col h4 {
+    margin-top: 0;
+    color: #3182ce;
+    border-bottom: 2px solid #ebf8ff;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f7fafc;
+}
+
+.stat-row span {
+    color: #718096;
+}
+
+.stat-row strong {
+    color: #2d3748;
+}
+
+.compare-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.5rem;
+    color: #cbd5e0;
+    font-style: italic;
+}
+
+.stat-graph {
+    margin-top: 1rem;
+    height: 6px;
+    background: #edf2f7;
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-graph::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--v, 50%);
+    background: #48bb78;
+    border-radius: 3px;
+}

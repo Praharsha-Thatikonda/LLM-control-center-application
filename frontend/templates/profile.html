@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile - NeuroForge{% endblock %}
+{% block breadcrumbs %}User / Profile{% endblock %}
+
+{% block extra_head %}
+<style>
+    .profile-header {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .cover-image {
+        height: 200px;
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cover-image::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('https://source.unsplash.com/random/1200x400/?abstract,pattern') center/cover;
+        opacity: 0.3;
+    }
+
+    .profile-nav-bar {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-top: none;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        padding: 0 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 70px;
+    }
+
+    .user-identity {
+        display: flex;
+        align-items: flex-end;
+        position: relative;
+        top: -40px;
+        margin-bottom: -40px;
+        /* Offset the negative top */
+        gap: 1.5rem;
+        z-index: 10;
+    }
+
+    .avatar-xl {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid white;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: #64748b;
+        background-image: url('https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff&size=256');
+        background-size: cover;
+        box-shadow: var(--shadow-md);
+    }
+
+    .user-text {
+        padding-bottom: 10px;
+        color: var(--text-primary);
+    }
+
+    .user-text h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .user-text p {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .profile-tabs {
+        display: flex;
+        gap: 2rem;
+        height: 100%;
+    }
+
+    .profile-nav-item {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        border-bottom: 2px solid transparent;
+        font-weight: 500;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .profile-nav-item:hover {
+        color: var(--accent-primary);
+    }
+
+    .profile-nav-item.active {
+        border-bottom-color: var(--accent-primary);
+        color: var(--accent-primary);
+        font-weight: 600;
+    }
+
+    /* Timeline Styles */
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+        border-left: 2px solid #e2e8f0;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: -2.6rem;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border: 2px solid var(--accent-primary);
+        border-radius: 50%;
+        top: 0;
+    }
+
+    .timeline-date {
+        font-size: 0.85rem;
+        color: var(--text-tertiary);
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="models-layout animate-fade-in">
+
+    <!-- Header Section -->
+    <div class="profile-header">
+        <div class="cover-image">
+            <button class="btn secondary small" style="position: absolute; right: 2rem; bottom: 2rem; z-index: 20;">
+                <i class="fas fa-camera"></i> Change Cover
+            </button>
+        </div>
+        <div class="profile-nav-bar">
+            <div class="user-identity">
+                <div class="avatar-xl"></div>
+                <div class="user-text">
+                    <h2>Admin User</h2>
+                    <p>Lead AI Architect &bull; San Francisco, CA</p>
+                </div>
+            </div>
+            <div class="profile-tabs">
+                <div class="profile-nav-item active" data-section="overview">Overview</div>
+                <div class="profile-nav-item" data-section="edit">Edit Profile</div>
+                <div class="profile-nav-item" data-section="activity">Activity Log</div>
+                <div class="profile-nav-item" data-section="billing">Billing & Plan</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Sections -->
+    <div class="profile-body">
+
+        <!-- 1. OVERVIEW -->
+        <div id="overview" class="profile-section" style="display:block;">
+            <div class="dashboard-grid" style="grid-template-columns: 2fr 1fr;">
+                <div class="card white-panel">
+                    <h3 class="mb-4">About Me</h3>
+                    <p class="text-muted mb-4">
+                        Senior Machine Learning Engineer with 8+ years of experience in deploying large-scale AI
+                        systems.
+                        Currently focused on optimizing LLM inference on consumer hardware and building autonomous agent
+                        workflows.
+                    </p>
+
+                    <h4 class="font-bold mb-3 text-sm uppercase text-gray-400">Skills & Expertise</h4>
+                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                        <span class="badge" style="background:#e0f2fe; color:#0369a1;">PyTorch</span>
+                        <span class="badge" style="background:#e0f2fe; color:#0369a1;">CUDA Optimization</span>
+                        <span class="badge" style="background:#e0f2fe; color:#0369a1;">Distributed Systems</span>
+                        <span class="badge" style="background:#f0fdf4; color:#15803d;">Llama-3</span>
+                        <span class="badge" style="background:#fefce8; color:#854d0e;">Prompt Engineering</span>
+                    </div>
+                </div>
+
+                <div class="card white-panel">
+                    <h3 class="mb-4">Quick Stats</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-3 bg-gray-50 rounded border text-center">
+                            <div class="text-2xl font-bold text-blue-600">12</div>
+                            <div class="text-xs text-muted font-bold uppercase">Models Trained</div>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded border text-center">
+                            <div class="text-2xl font-bold text-green-600">85h</div>
+                            <div class="text-xs text-muted font-bold uppercase">GPU Hours</div>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded border text-center">
+                            <div class="text-2xl font-bold text-purple-600">4</div>
+                            <div class="text-xs text-muted font-bold uppercase">Active Agents</div>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded border text-center">
+                            <div class="text-2xl font-bold text-orange-600">1.2TB</div>
+                            <div class="text-xs text-muted font-bold uppercase">Data Processed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. EDIT PROFILE -->
+        <div id="edit" class="profile-section" style="display:none;">
+            <div class="card white-panel max-w-3xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h3>Edit Profile Details</h3>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium mb-1">First Name</label>
+                        <input type="text" class="form-input" value="Admin">
+                    </div>
+                    <div class="form-group">
+                        <label class="block text-sm font-medium mb-1">Last Name</label>
+                        <input type="text" class="form-input" value="User">
+                    </div>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="block text-sm font-medium mb-1">Headline / Role</label>
+                    <input type="text" class="form-input" value="Lead AI Architect">
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="block text-sm font-medium mb-1">Bio</label>
+                    <textarea class="form-input"
+                        rows="4">Senior Machine Learning Engineer with 8+ years of experience...</textarea>
+                </div>
+
+                <div class="form-group mb-6">
+                    <label class="block text-sm font-medium mb-1">Location</label>
+                    <input type="text" class="form-input" value="San Francisco, CA">
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button class="btn secondary">Cancel</button>
+                    <button class="btn primary btn-save" onclick="saveProfile()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. ACTIVITY LOG -->
+        <div id="activity" class="profile-section" style="display:none;">
+            <div class="card white-panel">
+                <h3 class="mb-6">Recent Activity</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">Today, 10:42 AM</div>
+                        <h4 class="font-bold text-md">Launched Training Job #8821</h4>
+                        <p class="text-sm text-muted">Started fine-tuning <strong>Llama-3-8b</strong> on
+                            'finance-instruct-v2'.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">Yesterday, 4:15 PM</div>
+                        <h4 class="font-bold text-md">Imported New Dataset</h4>
+                        <p class="text-sm text-muted">Uploaded <strong>medical_records_scrubbed.jsonl</strong> (2.4 GB)
+                            to Data Hub.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">Nov 20, 2025</div>
+                        <h4 class="font-bold text-md">System Update</h4>
+                        <p class="text-sm text-muted">Updated NeuroForge Engine to v1.2.0-beta.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. BILLING -->
+        <div id="billing" class="profile-section" style="display:none;">
+            <div class="card white-panel">
+                <div class="flex justify-between items-center mb-6">
+                    <h3>Subscription Plan</h3>
+                    <span class="badge badge-primary">PRO</span>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-100 p-4 rounded-lg mb-6 flex justify-between items-center">
+                    <div>
+                        <h4 class="font-bold text-blue-900">NeuroForge Professional</h4>
+                        <p class="text-sm text-blue-700">Unlimited local models, priority support, and advanced agent
+                            tools.</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold">$0.00</div>
+                        <div class="text-xs text-muted">/ month (Local Version)</div>
+                    </div>
+                </div>
+
+                <h4 class="font-bold mb-3">Payment Methods</h4>
+                <div class="p-3 border rounded flex items-center gap-3 mb-4">
+                    <i class="fab fa-cc-visa text-2xl text-blue-800"></i>
+                    <div class="flex-1">
+                        <div class="font-medium">Visa ending in 4242</div>
+                        <div class="text-xs text-muted">Expires 12/2028</div>
+                    </div>
+                    <span class="badge badge-xs badge-primary">Default</span>
+                </div>
+
+                <div class="flex justify-between mt-6 pt-6 border-t border-gray-100">
+                    <button class="btn outline text-red-500">Cancel Subscription</button>
+                    <button class="btn secondary">Update Payment Method</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/profile.js') }}"></script>
+{% endblock %}

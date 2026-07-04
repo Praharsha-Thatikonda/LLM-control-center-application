@@ -1,0 +1,1 @@
+[{"id": "products.csv_0", "content": "id,name,category,score,sales\n1,Product A,Electronics,88,150\n2,Product B,Electronics,92,200\n3,Product C,Home,75,80\n4,Product D,Home,81,110\n5,Product E,Garden,60,50\n6,Product F,Garden,65,60\n7,Product G,Electronics,95,300\n8,Product H,Home,70,90\n", "metadata": {"source": "products.csv", "chunk": 0}}]

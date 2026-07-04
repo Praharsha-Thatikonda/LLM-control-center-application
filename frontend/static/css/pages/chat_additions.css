@@ -1,0 +1,122 @@
+/* Sidebar Sections */
+.history-section {
+    flex: 0 0 auto;
+    max-height: 40%;
+    display: flex;
+    flex-direction: column;
+}
+
+.config-section {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    /* Space for scrollbar */
+}
+
+/* History List */
+.history-list {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.history-item {
+    padding: 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #4a5568;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-item:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+}
+
+.history-item.active {
+    background: #ebf8ff;
+    /* Light blue */
+    color: #2b6cb0;
+    border-color: #bee3f8;
+    font-weight: 600;
+}
+
+.history-item .date-label {
+    display: block;
+    font-size: 0.7rem;
+    color: #a0aec0;
+    margin-top: 0.25rem;
+}
+
+.history-placeholder {
+    font-size: 0.85rem;
+    color: #a0aec0;
+    font-style: italic;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+/* Section Divider */
+.sidebar-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 1rem 0;
+}
+
+/* Section Header */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.section-header h3 {
+    font-size: 1rem;
+    color: #2d3748;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: #718096;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.icon-btn:hover {
+    background: #edf2f7;
+    color: #3182ce;
+}
+
+/* Scrollbar Styling for Sidebar */
+.config-section::-webkit-scrollbar,
+.history-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.config-section::-webkit-scrollbar-track,
+.history-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.config-section::-webkit-scrollbar-thumb,
+.history-list::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 3px;
+}

@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - NeuroForge{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Dashboard Specific Styles */
+    .dashboard-hero {
+        background: linear-gradient(135deg, var(--accent-primary), hsl(215, 90%, 35%));
+        color: white;
+        padding: 3rem;
+        border-radius: var(--radius-lg);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+    }
+
+    .dashboard-hero::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        border: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: url('https://source.unsplash.com/random/1200x400/?network,abstract') center/cover;
+        opacity: 0.1;
+        mix-blend-mode: overlay;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 10;
+    }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .action-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+        text-align: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        color: var(--text-primary);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .action-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent-primary);
+    }
+
+    .action-icon {
+        font-size: 1.5rem;
+        color: var(--accent-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .metric-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .progress-track {
+        background: #e2e8f0;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--accent-primary);
+        transition: width 0.5s ease;
+    }
+
+    .chart-box {
+        height: 150px;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .spotlight-card {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid var(--border-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <!-- Hero Section -->
+    <div class="dashboard-hero">
+        <div class="hero-content">
+            <h1 class="mb-2 text-3xl font-bold">Welcome Back, Architect.</h1>
+            <p class="opacity-90 text-lg mb-6">Your neural engine is online and ready for tasks.</p>
+
+            <div style="display:flex; gap:2rem;">
+                <div style="display:flex; gap:0.5rem; align-items:center;">
+                    <i class="fas fa-server opacity-75"></i>
+                    <span><strong>1</strong> Node Active</span>
+                </div>
+                <div style="display:flex; gap:0.5rem; align-items:center;">
+                    <i class="fas fa-cube opacity-75"></i>
+                    <span><strong>12</strong> Models Loaded</span>
+                </div>
+                <div style="display:flex; gap:0.5rem; align-items:center;">
+                    <i class="fas fa-clock opacity-75"></i>
+                    <span>Uptime: <strong>3d 4h</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="{{ url_for('chat_page') }}" class="action-card">
+            <div class="action-icon"><i class="fas fa-comments"></i></div>
+            <div class="font-bold">New Chat</div>
+        </a>
+        <a href="{{ url_for('training_page') }}" class="action-card">
+            <div class="action-icon"><i class="fas fa-dumbbell"></i></div>
+            <div class="font-bold">Train Model</div>
+        </a>
+        <a href="{{ url_for('datasets_page') }}" class="action-card">
+            <div class="action-icon"><i class="fas fa-database"></i></div>
+            <div class="font-bold">Import Data</div>
+        </a>
+        <a href="{{ url_for('models_page') }}" class="action-card">
+            <div class="action-icon"><i class="fas fa-upload"></i></div>
+            <div class="font-bold">Upload Model</div>
+        </a>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid" style="grid-template-columns: 2fr 1fr;">
+
+        <!-- Left Column -->
+        <div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+            <!-- System Resources -->
+            <div class="card white-panel">
+                <div class="flex justify-between items-center mb-4">
+                    <h3><i class="fas fa-microchip text-blue-500"></i> System Resources</h3>
+                    <span class="badge success">Healthy</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div style="padding-right: 1rem; border-right: 1px solid #f1f5f9;">
+                        <div class="metric-row"><span>GPU VRAM</span><span id="metric-vram">Loading...</span></div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="bar-vram" style="width: 0%;"></div>
+                        </div>
+
+                        <div class="metric-row"><span>CPU Load</span><span id="metric-cpu">Loading...</span></div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="bar-cpu"
+                                style="width: 0%; background: var(--accent-warning);"></div>
+                        </div>
+
+                        <div class="metric-row mt-2">
+                            <span>GPU Temp</span>
+                            <span id="metric-gpu-temp" class="font-bold text-green-600">--</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold text-muted mb-2">Real-time Load</div>
+                        <div class="chart-box">
+                            <canvas id="resourceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Jobs -->
+            <div class="card white-panel">
+                <div class="flex justify-between items-center mb-4">
+                    <h3>Active Training Jobs</h3>
+                    <button class="btn small outline">View All</button>
+                </div>
+                <table class="table w-full">
+                    <thead>
+                        <tr class="text-left text-muted text-sm border-b">
+                            <th class="pb-2">Job ID</th>
+                            <th class="pb-2">Model</th>
+                            <th class="pb-2">Epoch</th>
+                            <th class="pb-2">Status</th>
+                            <th class="pb-2"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b last:border-0 border-gray-50">
+                            <td class="py-3 font-mono text-sm">#TRN-094</td>
+                            <td>Llama-3-8B</td>
+                            <td>4 / 10</td>
+                            <td><span class="badge" style="background:#dbeafe; color:#1e40af;"><i
+                                        class="fas fa-spinner fa-spin mr-1"></i> Running</span></td>
+                            <td class="text-right"><button class="btn-icon-only"><i class="fas fa-pause"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 font-mono text-sm">#TRN-095</td>
+                            <td>Mistral-7B-v2</td>
+                            <td>--</td>
+                            <td><span class="badge" style="background:#f3f4f6; color:#4b5563;">Queued</span></td>
+                            <td class="text-right"><button class="btn-icon-only"><i class="fas fa-times"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- Right Column -->
+        <div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+            <!-- Model Spotlight -->
+            <div class="card spotlight-card">
+                <div class="mb-3">
+                    <span class="text-xs font-bold uppercase text-blue-500 tracking-wide">Featured Model</span>
+                </div>
+                <div class="flex items-start gap-3 mb-4">
+                    <div class="bg-blue-100 text-blue-600 p-3 rounded-lg"><i class="fas fa-brain fa-2x"></i></div>
+                    <div>
+                        <h3 class="leading-tight">Llama-3-70B-Chat</h3>
+                        <p class="text-sm text-muted">Meta AI &bull; 4-bit Quantized</p>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 mb-4">The latest state-of-the-art open source model, now available for
+                    local inference. Optimized for logic and coding tasks.</p>
+                <button class="btn outline full-width">Load Model</button>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card white-panel">
+                <h3 class="mb-3">Recent Activity</h3>
+                <div id="recent-activity-list">
+                    <!-- Populated by JS -->
+                    <div class="text-muted text-sm">Loading activity...</div>
+                </div>
+                <a href="#" class="block text-center text-sm text-blue-500 mt-3 font-medium hover:underline">View Log
+                    History</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>
+{% endblock %}

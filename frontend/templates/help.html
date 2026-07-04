@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Help Support - NeuroForge{% endblock %}
+{% block breadcrumbs %}System / Help & Support{% endblock %}
+
+{% block extra_head %}
+<style>
+    .help-banner {
+        background: linear-gradient(135deg, var(--accent-primary), #1e40af);
+        padding: 3rem 2rem;
+        border-radius: var(--radius-lg);
+        color: white;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.5);
+    }
+
+    .help-banner h2 {
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .help-search-box {
+        max-width: 500px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .help-search-box input {
+        width: 100%;
+        padding: 1rem 1.5rem 1rem 3rem;
+        border-radius: 99px;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        font-size: 1rem;
+    }
+
+    .help-search-box i {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+
+    .faq-item {
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 0;
+    }
+
+    .faq-question {
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--text-primary);
+    }
+
+    .faq-answer {
+        margin-top: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        display: none;
+        padding-right: 1rem;
+    }
+
+    .faq-item.active .faq-answer {
+        display: block;
+    }
+
+    .faq-item.active .faq-question {
+        color: var(--accent-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <!-- Search Banner -->
+    <div class="help-banner">
+        <h2>How can we help you today?</h2>
+        <div class="help-search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search documentation, error codes, or tutorials...">
+        </div>
+    </div>
+
+    <div class="dashboard-grid" style="grid-template-columns: 2fr 1fr;">
+        <!-- Left: FAQ & Docs -->
+        <div>
+            <div class="card white-panel mb-4">
+                <h3 class="mb-4"><i class="fas fa-question-circle text-blue-500"></i> Frequently Asked Questions</h3>
+
+                <div class="faq-list">
+                    <div class="faq-item" onclick="this.classList.toggle('active')">
+                        <div class="faq-question">How do I resolve CUDA Out of Memory errors? <i
+                                class="fas fa-chevron-down"></i></div>
+                        <div class="faq-answer">Try reducing the batch size in your training configuration, or enable
+                            4-bit quantization (QLoRA) to significantly lower VRAM usage. Gradient Checkpointing is also
+                            recommended.</div>
+                    </div>
+                    <div class="faq-item" onclick="this.classList.toggle('active')">
+                        <div class="faq-question">Can I import custom GGUF models? <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">Yes! Navigate to the Model Registry > Import tab, and either
+                            drag-and-drop your .gguf file or provide a local path to ingest it into the system.</div>
+                    </div>
+                    <div class="faq-item" onclick="this.classList.toggle('active')">
+                        <div class="faq-question">Where are my checkpoints saved? <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">Checkpoints are stored in the <code>/data/checkpoints/</code> directory
+                            relative to your installation. You can view and manage them directly from the Training >
+                            Checkpoints tab.</div>
+                    </div>
+                    <div class="faq-item" onclick="this.classList.toggle('active')">
+                        <div class="faq-question">How do I connect to an external Ollama instance? <i
+                                class="fas fa-chevron-down"></i></div>
+                        <div class="faq-answer">Go to Settings > Integrations. Enter your Ollama host URL (e.g.,
+                            http://localhost:11434). The system will auto-detect available models.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card white-panel">
+                <h3><i class="fas fa-book-open text-purple-500"></i> Documentation & Guides</h3>
+                <p class="text-muted mb-3">Comprehensive guides to master NeuroForge.</p>
+                <div class="grid-stack text-left" style="grid-template-columns: 1fr 1fr;">
+                    <a href="#" class="btn outline full-width start"><i class="fas fa-rocket"></i> Quick Start Guide</a>
+                    <a href="#" class="btn outline full-width start"><i class="fas fa-code"></i> API Reference</a>
+                    <a href="#" class="btn outline full-width start"><i class="fas fa-graduation-cap"></i> Fine-Tuning
+                        101</a>
+                    <a href="#" class="btn outline full-width start"><i class="fas fa-cubes"></i> Architecture Specs</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Support Form -->
+        <div>
+            <div class="card glass-panel sticky-top" style="top: 100px;">
+                <h3 class="mb-3"><i class="fas fa-headset text-green-500"></i> Contact Support</h3>
+                <p class="text-muted text-sm mb-4">Facing a technical issue? Our engineering team is here to assist.</p>
+                <form>
+                    <div class="form-group mb-3">
+                        <label class="block text-sm font-medium mb-1">Issue Type</label>
+                        <select class="form-select">
+                            <option>Bug Report</option>
+                            <option>Feature Request</option>
+                            <option>Account & Billing</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="block text-sm font-medium mb-1">Severity</label>
+                        <select class="form-select">
+                            <option>Low (Minor UI/UX)</option>
+                            <option selected>Medium (Functional Issue)</option>
+                            <option>High (System Crash)</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="block text-sm font-medium mb-1">Description</label>
+                        <textarea class="form-input" rows="5"
+                            placeholder="Please describe the steps to reproduce..."></textarea>
+                    </div>
+                    <button type="submit" class="btn primary full-width">Submit Ticket</button>
+                </form>
+                <div class="mt-4 pt-3 border-t border-gray-200 text-center text-sm text-muted">
+                    <i class="fas fa-envelope"></i> help@neuroforge.ai
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

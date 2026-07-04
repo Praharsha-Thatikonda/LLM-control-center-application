@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Developer Blog - NeuroForge{% endblock %}
+{% block breadcrumbs %}Community / Blog{% endblock %}
+
+{% block extra_head %}
+<style>
+    .blog-hero {
+        background: url('https://source.unsplash.com/random/1200x400/?technology,ai') center/cover;
+        height: 300px;
+        border-radius: var(--radius-lg);
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+
+    .blog-hero::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(0deg, rgba(0, 0, 0, 0.8), transparent);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 10;
+        color: white;
+        max-width: 800px;
+    }
+
+    .post-card {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: transform 0.2s;
+        cursor: pointer;
+    }
+
+    .post-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .post-img {
+        height: 180px;
+        background: #cbd5e1;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .post-body {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .post-tag {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--accent-primary);
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="models-layout animate-fade-in">
+    <div class="header-content mb-4">
+        <h2>Engineering Blog</h2>
+        <p class="text-muted">Stay updated with the latest research, release notes, and tutorials.</p>
+    </div>
+
+    <!-- Hero Post -->
+    <div class="blog-hero">
+        <div class="hero-content">
+            <span class="badge badge-primary mb-2">Featured Release</span>
+            <h1 class="mb-2">Introducing NeuroForge Architect: Visual Agent Builder</h1>
+            <p class="text-gray-200">Build complex multi-agent workflows with a drag-and-drop interface. No coding
+                required for basic implementations.</p>
+        </div>
+    </div>
+
+    <!-- Post Grid -->
+    <div class="dashboard-grid">
+        <div class="card white-panel post-card">
+            <div class="post-img" style="background-image: url('https://source.unsplash.com/random/400x300/?code');">
+            </div>
+            <div class="post-body">
+                <span class="post-tag">Optimization</span>
+                <h4>Understanding 4-bit Quantization (QLoRA)</h4>
+                <p class="text-muted text-sm mt-2 mb-4">A technical deep dive into how QLoRA works and why it reduces
+                    VRAM usage by 60% without significant accuracy loss.</p>
+                <div class="mt-auto text-xs text-muted">
+                    <i class="far fa-clock"></i> 5 min read &bull; Nov 24, 2025
+                </div>
+            </div>
+        </div>
+
+        <div class="card white-panel post-card">
+            <div class="post-img" style="background-image: url('https://source.unsplash.com/random/400x300/?server');">
+            </div>
+            <div class="post-body">
+                <span class="post-tag">Tutorial</span>
+                <h4>Deploying Your First Llama-3 Model</h4>
+                <p class="text-muted text-sm mt-2 mb-4">Step-by-step guide to downloading, configuring, and serving the
+                    new Llama-3 instruction tuned model.</p>
+                <div class="mt-auto text-xs text-muted">
+                    <i class="far fa-clock"></i> 12 min read &bull; Nov 20, 2025
+                </div>
+            </div>
+        </div>
+
+        <div class="card white-panel post-card">
+            <div class="post-img" style="background-image: url('https://source.unsplash.com/random/400x300/?data');">
+            </div>
+            <div class="post-body">
+                <span class="post-tag">Data Engineering</span>
+                <h4>Building a Custom Dataset from PDFs</h4>
+                <p class="text-muted text-sm mt-2 mb-4">How to use the Data Hub to ingest unstructured documents and
+                    convert them into training-ready JSONL format.</p>
+                <div class="mt-auto text-xs text-muted">
+                    <i class="far fa-clock"></i> 8 min read &bull; Nov 15, 2025
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

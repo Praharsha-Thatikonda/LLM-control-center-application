@@ -1,0 +1,11 @@
+id,name,category,score,sales
+1,Product A,Electronics,88,150
+2,Product B,Electronics,92,200
+3,Product C,Home,75,80
+4,Product D,Home,81,110
+5,Product E,Garden,60,50
+6,Product F,Garden,65,60
+7,Product G,Electronics,95,300
+8,Product H,Home,70,90
+7,Product G,Electronics,62,225
+3,Product A,Garden,91,271

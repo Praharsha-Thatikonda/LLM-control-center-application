@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Models - NeuroForge{% endblock %}
+{% block breadcrumbs %}Resources / Models{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/models.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/models_additions.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="models-layout animate-fade-in">
+    <div class="page-header glass-header" style="margin: -2rem -2rem 2rem -2rem; padding: 1.5rem 2rem;">
+        <div class="header-content">
+            <h2>Model Registry</h2>
+            <p class="text-muted text-sm">Manage, compare, and deploy your local LLMs</p>
+        </div>
+        <div class="tab-navigation pill-nav">
+            <button class="tab-btn active" data-tab="registry-tab"><i class="fas fa-server"></i> Local Registry</button>
+            <button class="tab-btn" data-tab="hub-tab"><i class="fas fa-cloud"></i> Cloud Hub</button>
+            <button class="tab-btn" data-tab="creator-tab"><i class="fas fa-hammer"></i> Creator</button>
+            <button class="tab-btn" data-tab="control-tab"><i class="fas fa-gamepad"></i> Control Panel</button>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <!-- Local Models Tab (Renamed registry-tab) -->
+        <div id="registry-tab" class="tab-pane active">
+            <div class="toolbar glass-panel mb-3"
+                style="display:flex; gap:1rem; padding:1rem; border-radius:var(--radius-md); align-items:center;">
+                <div class="search-wrapper" style="flex:1;">
+                    <i class="fas fa-search text-muted" style="position:absolute; padding: 12px;"></i>
+                    <input type="text" class="search-input" placeholder="Search local registry..."
+                        style="padding-left: 2.5rem;">
+                </div>
+                <input type="file" id="model-upload-input" style="display:none;" accept=".gguf,.bin,.pt">
+                <button class="btn secondary" onclick="document.getElementById('model-upload-input').click()">
+                    <i class="fas fa-file-import"></i> Import File
+                </button>
+                <button class="btn secondary refresh-btn"><i class="fas fa-sync"></i> Refresh</button>
+            </div>
+
+            <div class="models-grid dashboard-grid" id="local-models-grid">
+                <!-- Populated via JS -->
+                <div class="loading-placeholder text-center text-muted p-5">
+                    <i class="fas fa-circle-notch fa-spin fa-2x mb-3"></i>
+                    <p>Loading local models...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Cloud Hub Tab (Unified) -->
+    <div id="hub-tab" class="tab-pane">
+        <div class="toolbar glass-panel mb-3" style="display:flex; gap:1rem; padding:1rem;">
+            <div class="pill-nav small">
+                <button class="filter-btn active" data-source="hf">HuggingFace</button>
+                <button class="filter-btn" data-source="ollama">Ollama Library</button>
+            </div>
+            <input type="text" class="search-input" id="hub-search" placeholder="Search models..." style="flex:1;">
+            <button class="btn primary" id="hub-search-btn">Search</button>
+        </div>
+        <div class="models-grid dashboard-grid" id="hub-results-grid">
+            <!-- Results -->
+            <div class="empty-state text-center p-5 text-muted">
+                <i class="fas fa-cloud fa-3x mb-3"></i>
+                <p>Search over 500k community models</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Creator Tab -->
+    <div id="creator-tab" class="tab-pane">
+        <div class="creator-layout" style="display:grid; grid-template-columns: 2fr 1fr; gap:2rem;">
+            <div class="form-section card-flat white-panel">
+                <h3 class="mb-3">Create Model Configuration</h3>
+                <div class="form-group mb-3">
+                    <label>Model Name</label>
+                    <input type="text" id="create-name" class="form-input" placeholder="e.g. My-Custom-Llama-v1">
+                </div>
+                <div class="form-group mb-3">
+                    <label>Base Architecture</label>
+                    <select id="create-arch" class="form-select">
+                        <option value="llama3">Llama 3</option>
+                        <option value="mistral">Mistral</option>
+                        <option value="gemma">Gemma</option>
+                        <option value="bert">BERT</option>
+                    </select>
+                </div>
+                <div class="form-row mb-3" style="display:flex; gap:1rem;">
+                    <dvi style="flex:1;">
+                        <label>Context Size</label>
+                        <select class="form-select">
+                            <option>4096 (4k)</option>
+                            <option>8192 (8k)</option>
+                            <option>32000 (32k)</option>
+                        </select>
+                    </dvi>
+                    <div style="flex:1;">
+                        <label>Parameter Count</label>
+                        <select class="form-select">
+                            <option>7B</option>
+                            <option>13B</option>
+                            <option>70B</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group mb-3">
+                    <label>Directives (System Prompt)</label>
+                    <textarea class="form-input" rows="5" placeholder="You are a helpful assistant..."></textarea>
+                </div>
+                <div class="actions">
+                    <button class="btn primary" id="btn-create-model"><i class="fas fa-plus"></i> Create
+                        Scaffold</button>
+                </div>
+            </div>
+            <div class="tips-section">
+                <div class="tip-card mb-3">
+                    <h6><i class="fas fa-lightbulb text-yellow-500"></i> Pro Tip</h6>
+                    <p class="text-xs text-muted">Creating a scaffold enables you to associate LoRA adapters and
+                        quantization configs before downloading weights.</p>
+                </div>
+                <div class="tip-card">
+                    <h6><i class="fas fa-book text-blue-500"></i> Documentation</h6>
+                    <p class="text-xs text-muted">See the Fine-Tuning guide for details on custom architectures.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Control Panel Tab -->
+    <div id="control-tab" class="tab-pane">
+        <div class="control-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+
+            <!-- System Status -->
+            <div class="status-card card-flat white-panel">
+                <h5 class="mb-3"><i class="fas fa-microchip"></i> Engine Status</h5>
+                <div class="stat-row mb-2">
+                    <span>Active Model:</span>
+                    <strong id="ctrl-active-model" class="text-blue-600">None</strong>
+                </div>
+                <div class="stat-row mb-2">
+                    <span>Status:</span>
+                    <span id="ctrl-status-badge" class="badge">Idle</span>
+                </div>
+                <div class="vram-meter mt-3">
+                    <div class="flex-between text-xs mb-1">
+                        <span>VRAM Usage</span>
+                        <span id="ctrl-vram-text">0 / 24 GB</span>
+                    </div>
+                    <div class="progress-bar-bg" style="background:#eee; height:8px; border-radius:4px;">
+                        <div id="ctrl-vram-bar"
+                            style="width:0%; background:var(--accent-primary); height:100%; border-radius:4px; transition: width 0.5s;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-actions mt-4" style="display:flex; gap:1rem;">
+                    <button class="btn destructive full-width" id="btn-unload"><i class="fas fa-power-off"></i>
+                        Unload</button>
+                </div>
+            </div>
+
+            <!-- Loader -->
+            <div class="loader-card card-flat white-panel">
+                <h5 class="mb-3"><i class="fas fa-upload"></i> Load Model</h5>
+                <div class="form-group mb-3">
+                    <label>Select Model</label>
+                    <select id="ctrl-model-select" class="form-select">
+                        <option value="">Choose a model...</option>
+                    </select>
+                </div>
+                <div class="form-group mb-3">
+                    <label>Context Window</label>
+                    <input type="number" class="form-input" value="4096">
+                </div>
+                <div class="form-group mb-3">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" checked> Use GPU Layers (n_gpu_layers)
+                    </label>
+                </div>
+                <button class="btn primary full-width" id="btn-load"><i class="fas fa-play"></i> Load into
+                    Memory</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/models.js') }}"></script>
+{% endblock %}

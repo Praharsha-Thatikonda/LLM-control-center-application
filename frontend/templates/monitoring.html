@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Monitoring - NeuroForge{% endblock %}
+{% block breadcrumbs %}Lab / Ops / Monitoring{% endblock %}
+
+{% block extra_head %}
+<!-- Reuse models CSS for grid/list styles or generic -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/models.css') }}">
+<style>
+    .monitor-tabs {
+        margin-bottom: 2rem;
+    }
+
+    .trace-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .trace-item {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        padding: 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .trace-item:hover {
+        background: #f8fafc;
+    }
+
+    .trace-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .trace-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    .chart-container {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        height: 300px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #94a3b8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>System Monitoring</h2>
+    <div class="tab-navigation">
+        <button class="tab-btn active" onclick="switchTab('tracing')"><i class="fas fa-stethoscope"></i>
+            Tracing</button>
+        <button class="tab-btn" onclick="switchTab('profiling')"><i class="fas fa-microchip"></i> Profiling</button>
+    </div>
+</div>
+
+<div id="tracing-tab" class="tab-content active">
+    <!-- Filters -->
+    <div class="toolbar">
+        <input type="text" class="search-input" placeholder="Search by Trace ID or Operation...">
+        <button class="btn secondary" onclick="loadTraces()"><i class="fas fa-sync"></i> Refresh</button>
+    </div>
+
+    <div class="trace-list" id="trace-list">
+        <!-- JS Populated -->
+        <div class="loading-placeholder">Loading traces...</div>
+    </div>
+</div>
+
+<div id="profiling-tab" class="tab-content" style="display:none;">
+    <div class="models-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="chart-container">
+            <!-- Mock Chart -->
+            <div>
+                <i class="fas fa-chart-area"
+                    style="font-size: 3rem; margin-bottom: 1rem; display:block; text-align:center;"></i>
+                <p>CPU / GPU Usage Over Time</p>
+            </div>
+        </div>
+        <div class="chart-container">
+            <!-- Mock Chart -->
+            <div>
+                <i class="fas fa-chart-bar"
+                    style="font-size: 3rem; margin-bottom: 1rem; display:block; text-align:center;"></i>
+                <p>Memory Allocation Events</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function switchTab(tab) {
+        document.getElementById('tracing-tab').style.display = tab === 'tracing' ? 'block' : 'none';
+        document.getElementById('profiling-tab').style.display = tab === 'profiling' ? 'block' : 'none';
+
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', loadTraces);
+
+    async function loadTraces() {
+        const container = document.getElementById('trace-list');
+        try {
+            const res = await fetch('/api/v1/monitoring/traces');
+            const traces = await res.json();
+
+            if (traces.length === 0) {
+                container.innerHTML = '<p class="empty-state">No traces found.</p>';
+                return;
+            }
+
+            container.innerHTML = traces.map(t => `
+                <div class="trace-item">
+                    <div class="trace-header">
+                        <span>${t.operation_name}</span>
+                        <span class="badge ${t.attributes.includes('error') ? 'danger' : 'success'}">
+                            ${t.end_time ? 'Completed' : 'Running'}
+                        </span>
+                    </div>
+                    <div class="trace-meta">
+                        <span>ID: ${t.trace_id.substring(0, 8)}...</span>
+                        <span>Start: ${new Date(t.start_time).toLocaleTimeString()}</span>
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            console.error(e);
+            container.innerHTML = '<p class="error">Failed to load traces.</p>';
+        }
+    }
+</script>
+{% endblock %}

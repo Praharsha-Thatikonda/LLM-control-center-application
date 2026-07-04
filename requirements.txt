@@ -1,0 +1,12 @@
+flask
+torch
+transformers
+peft
+accelerate
+bitsandbytes
+sentencepiece
+datasets
+scipy
+pandas
+numpy
+huggingface_hub

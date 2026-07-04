@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - NeuroForge{% endblock %}
+{% block breadcrumbs %}System / Settings{% endblock %}
+
+{% block extra_head %}
+<style>
+    .settings-container {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .settings-nav li {
+        padding: 0.8rem 1rem;
+        cursor: pointer;
+        border-radius: var(--radius-md);
+        color: var(--text-secondary);
+        font-weight: 500;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .settings-nav li:hover {
+        background: rgba(0, 0, 0, 0.03);
+        color: var(--text-primary);
+    }
+
+    .settings-nav li.active {
+        background: white;
+        color: var(--accent-primary);
+        box-shadow: var(--shadow-sm);
+        font-weight: 600;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .integration-card {
+        border: 1px solid var(--border-color);
+        padding: 1.5rem;
+        border-radius: 12px;
+        background: #f8fafc;
+        margin-bottom: 1rem;
+        transition: all 0.2s;
+    }
+
+    .integration-card.active {
+        background: white;
+        border-color: var(--accent-primary);
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+    }
+
+    .int-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .int-icon {
+        font-size: 1.5rem;
+        margin-right: 0.5rem;
+        color: var(--text-secondary);
+    }
+
+    .range-wrap {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .range-val {
+        min-width: 60px;
+        font-weight: 700;
+        color: var(--accent-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="models-layout animate-fade-in">
+    <div class="header-content mb-4" style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <h2>System Configuration</h2>
+            <p class="text-muted">Manage global preferences, hardware resources, and external connections.</p>
+        </div>
+        <button class="btn primary" id="save-btn" onclick="saveSettings()">
+            <i class="fas fa-save"></i> Save Changes
+        </button>
+    </div>
+
+    <div class="settings-container">
+        <!-- Sidebar Navigation -->
+        <div class="card glass-panel" style="padding: 1rem;">
+            <ul class="settings-nav list-none">
+                <li data-tab="general" class="active"><i class="fas fa-sliders-h"></i> General</li>
+                <li data-tab="compute"><i class="fas fa-microchip"></i> Compute & Hardware</li>
+                <li data-tab="integrations"><i class="fas fa-plug"></i> Integrations</li>
+                <li data-tab="notifications"><i class="fas fa-bell"></i> Notifications</li>
+                <li data-tab="security"><i class="fas fa-shield-alt"></i> Security</li>
+            </ul>
+        </div>
+
+        <!-- Content Area -->
+        <div class="settings-content">
+
+            <!-- 1. GENERAL -->
+            <div id="general-section" class="settings-section card white-panel">
+                <div class="section-title">General Preferences</div>
+                <div class="form-group mb-4">
+                    <label class="block mb-2 font-medium">Workspace Root Path</label>
+                    <div style="display:flex; gap:0.5rem;">
+                        <input type="text" class="form-input" value="~/neuroforge/workspace" disabled>
+                        <button class="btn secondary">Browse</button>
+                    </div>
+                    <p class="text-xs text-muted mt-1">Base directory for storing datasets, models, and checkpoints.</p>
+                </div>
+                <div class="grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="block mb-2 font-medium">Interface Theme</label>
+                        <select class="form-select">
+                            <option>Light (Professional)</option>
+                            <option>Dark (Cyber)</option>
+                            <option>System Default</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="block mb-2 font-medium">Code Editor Keymap</label>
+                        <select class="form-select">
+                            <option>Standard (VS Code)</option>
+                            <option>Vim</option>
+                            <option>Emacs</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. COMPUTE -->
+            <div id="compute-section" class="settings-section card white-panel" style="display:none;">
+                <div class="section-title">Compute & Hardware Resources</div>
+                <div class="alert info mb-4">
+                    <i class="fas fa-info-circle"></i> Changes to compute devices typically require a restart of the
+                    Python engine.
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="block mb-2 font-medium">Primary Accelerator Device</label>
+                    <select class="form-select">
+                        <option>NVIDIA RTX 4090 (cuda:0)</option>
+                        <option>CPU Only (Slow)</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="block mb-2 font-medium">Max VRAM Allocation (GB)</label>
+                    <div class="range-wrap">
+                        <input type="range" min="4" max="24" value="20" class="slider" style="flex:1;">
+                        <span class="range-val">20 GB</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="block mb-2 font-medium">Default Quantization Strategy</label>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:1rem;">
+                        <label class="selectable-card p-3 text-center border rounded cursor-pointer selected">
+                            <input type="radio" name="quant" checked class="hidden">
+                            <strong>4-bit (QLoRA)</strong>
+                            <div class="text-xs text-muted">Best for Consumer GPUs</div>
+                        </label>
+                        <label class="selectable-card p-3 text-center border rounded cursor-pointer">
+                            <input type="radio" name="quant" class="hidden">
+                            <strong>8-bit</strong>
+                            <div class="text-xs text-muted">Balanced</div>
+                        </label>
+                        <label class="selectable-card p-3 text-center border rounded cursor-pointer">
+                            <input type="radio" name="quant" class="hidden">
+                            <strong>Info (FP16)</strong>
+                            <div class="text-xs text-muted">Max Precision</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. INTEGRATIONS -->
+            <div id="integrations-section" class="settings-section card white-panel" style="display:none;">
+                <div class="section-title">External Services</div>
+
+                <div class="integration-card active animate-fade-in">
+                    <div class="int-header">
+                        <div class="flex items-center">
+                            <i class="fas fa-ghost int-icon"></i>
+                            <strong>HuggingFace Hub</strong>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-xs text-muted">Access Token (Read/Write)</label>
+                        <input type="password" value="hf_xxxxxxxxxxxxxxxxxxx" class="form-input">
+                    </div>
+                </div>
+
+                <div class="integration-card animate-fade-in">
+                    <div class="int-header">
+                        <div class="flex items-center">
+                            <i class="fas fa-server int-icon"></i>
+                            <strong>Ollama Local Server</strong>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-xs text-muted">Host URL</label>
+                        <input type="text" placeholder="http://localhost:11434" class="form-input" disabled>
+                    </div>
+                </div>
+
+                <div class="integration-card animate-fade-in">
+                    <div class="int-header">
+                        <div class="flex items-center">
+                            <i class="fas fa-chart-line int-icon"></i>
+                            <strong>Weights & Biases</strong>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-xs text-muted">API Key</label>
+                        <input type="password" placeholder="wandb_xxxxxxxx" class="form-input" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. NOTIFICATIONS -->
+            <div id="notifications-section" class="settings-section card white-panel" style="display:none;">
+                <div class="section-title">Alerts & Webhooks</div>
+                <div class="form-group mb-4">
+                    <label class="block mb-2 font-medium">Email Notifications</label>
+                    <label class="flex items-center gap-2 mb-2">
+                        <input type="checkbox" checked> Training Run Completed
+                    </label>
+                    <label class="flex items-center gap-2 mb-2">
+                        <input type="checkbox" checked> System Error / Crash
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox"> New Model Available in Hub
+                    </label>
+                </div>
+                <hr class="border-gray-200 my-4">
+                <div class="form-group">
+                    <label class="block mb-2 font-medium">Webhook URL (Slack/Discord)</label>
+                    <input type="text" placeholder="https://hooks.slack.com/services/..." class="form-input">
+                </div>
+            </div>
+
+            <!-- 5. SECURITY -->
+            <div id="security-section" class="settings-section card white-panel" style="display:none;">
+                <div class="section-title">Security & Access</div>
+
+                <div class="flex-between mb-4 pb-4 border-b border-gray-100">
+                    <div>
+                        <h4 class="font-bold">Two-Factor Authentication</h4>
+                        <p class="text-sm text-muted">Add an extra layer of security to your admin account.</p>
+                    </div>
+                    <button class="btn secondary">Enable 2FA</button>
+                </div>
+
+                <h4 class="font-bold mb-3">API Access Tokens</h4>
+                <table class="table" style="width:100%;">
+                    <thead>
+                        <tr class="text-left text-sm text-muted">
+                            <th>Token Name</th>
+                            <th>Created</th>
+                            <th>Last Used</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-50">
+                            <td class="py-2"><strong>CI/CD Pipeline</strong></td>
+                            <td>Oct 12, 2025</td>
+                            <td>2 mins ago</td>
+                            <td><button class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="py-2"><strong>Jupyter Notebook</strong></td>
+                            <td>Nov 01, 2025</td>
+                            <td>Yesterday</td>
+                            <td><button class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="btn p-0 mt-3 text-blue-500 font-medium"><i class="fas fa-plus"></i> Generate New
+                    Token</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/settings.js') }}"></script>
+{% endblock %}

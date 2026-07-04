@@ -1,0 +1,120 @@
+/* Workflow Editor Styles */
+
+.workflow-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: -2rem;
+    /* counteract padding */
+    overflow: hidden;
+}
+
+.workflow-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.nodes-palette {
+    width: 260px;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-glass);
+    backdrop-filter: blur(var(--backdrop-blur));
+    border-right: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+.nodes-palette h4 {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.palette-category {
+    margin-bottom: 1.5rem;
+}
+
+.palette-category h5 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 0.75rem;
+    padding-left: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.draggable-node {
+    padding: 0.75rem 1rem;
+    background: white;
+    border: 1px solid var(--border-color);
+    margin-bottom: 0.5rem;
+    border-radius: var(--radius-md);
+    cursor: grab;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+    user-select: none;
+    display: flex;
+    align-items: center;
+}
+
+.draggable-node:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.draggable-node i {
+    width: 20px;
+    text-align: center;
+    margin-right: 0.5rem;
+}
+
+.draggable-node:active {
+    cursor: grabbing;
+}
+
+.canvas-container {
+    flex: 1;
+    background: #f8fafc;
+    /* Dot Grid Background */
+    background-image: radial-gradient(#cbd5e0 1px, transparent 1px);
+    background-size: 24px 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.02);
+}
+
+.canvas-controls {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 100;
+    background: white;
+    padding: 0.5rem;
+    border-radius: 999px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+}
+
+/* Placed Node Styles now inside JS/HTML inline mostly, or override here */
+.workflow-node {
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.workflow-node:hover {
+    box-shadow: var(--shadow-xl) !important;
+}
+
+/* Ports */
+.port-in:hover,
+.port-out:hover {
+    transform: scale(1.2);
+    border-color: var(--accent-primary) !important;
+}

@@ -1,0 +1,548 @@
+{% extends "base.html" %}
+
+{% block title %}Datasets - NeuroForge{% endblock %}
+{% block breadcrumbs %}Resources / Datasets{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/datasets.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="datasets-layout animate-fade-in" style="height: 100%; display: flex; flex-direction: column;">
+    <!-- Compact Header -->
+    <div class="page-header glass-header"
+        style="flex: 0 0 auto; margin: -2rem -2rem 0 -2rem; padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color);">
+        <div class="flex-between" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <h2 style="margin:0;">Dataset Manager</h2>
+                <p class="text-muted text-sm" style="margin:0;">Orchestrate data lifecycles across roles</p>
+            </div>
+            <div class="header-actions" style="display:flex; gap:0.5rem;">
+                <button class="btn secondary small"><i class="fas fa-magic"></i> Auto-Clean</button>
+                <button class="btn primary small"><i class="fas fa-plus"></i> New Dataset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Level Horizontal Menu -->
+    <div class="top-nav-bar" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);">
+        <div class="pill-nav" style="display: flex; gap: 1rem;">
+            <button class="nav-pill active" data-target="view-sources">
+                <i class="fas fa-database"></i> Data Sources
+            </button>
+            <button class="nav-pill" data-target="view-viz">
+                <i class="fas fa-chart-pie"></i> Utilization & Viz
+            </button>
+            <button class="nav-pill" data-target="view-roles">
+                <i class="fas fa-user-circle"></i> Role Workspace
+            </button>
+        </div>
+    </div>
+
+    <div class="app-workspace" style="position: relative; height: 100%; overflow: hidden;">
+
+        <!-- VIEW 1: DATA SOURCES (Local / Hub) -->
+        <div id="view-sources" class="main-view active animate-fade-in"
+            style="height:100%; display:flex; flex-direction:column;">
+            <div class="sources-controls mb-3" style="display:flex; gap:1rem; align-items:center;">
+                <div class="pill-nav small">
+                    <button class="tab-btn active" id="tab-local"><i class="fas fa-hdd"></i> Local Storage</button>
+                    <button class="tab-btn" id="tab-hub"><i class="fas fa-cloud"></i> Cloud Hub</button>
+                </div>
+                <div style="display:flex; gap:0.5rem; margin-left: auto;">
+                    <button class="btn secondary small" id="btn-cloud-export" title="Backup to Cloud"><i
+                            class="fas fa-cloud-upload-alt"></i> Push to Cloud</button>
+                    <button id="refresh-list-btn" class="btn icon-only secondary"><i
+                            class="fas fa-sync-alt"></i></button>
+                </div>
+            </div>
+
+            <div class="sources-list-container custom-scrollbar"
+                style="flex:1; overflow-y:auto; background: white; border:1px solid var(--border-color); border-radius: var(--radius-md);">
+                <ul class="item-list" id="dataset-list" style="list-style:none; padding:0; margin:0;">
+                    <!-- Local Files List -->
+                </ul>
+                <div class="hub-container" id="hub-container"
+                    style="display:none; flex-direction:column; background:white; border:1px solid var(--border-color); border-radius: var(--radius-md);">
+                    <div class="hub-filter-bar"
+                        style="padding:1rem; border-bottom:1px solid #eee; display:flex; gap:0.5rem;">
+                        <span class="text-xs font-bold text-muted mr-2" style="align-self:center;">SOURCE:</span>
+                        <button class="filter-pill active" data-source="all">All</button>
+                        <button class="filter-pill" data-source="neuroforge"><i class="fas fa-brain"></i>
+                            NeuroForge</button>
+                        <button class="filter-pill" data-source="huggingface">🤗 Hugging Face</button>
+                        <button class="filter-pill" data-source="kaggle"><i class="fab fa-kaggle"></i> Kaggle</button>
+                    </div>
+                    <div class="hub-list custom-scrollbar" id="hub-list" style="padding:1rem; overflow-y:auto; flex:1;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: VISUALIZATION & UTILIZATION -->
+        <div id="view-viz" class="main-view animate-fade-in" style="height:100%; display:none; overflow-y:auto;">
+            <div class="empty-state" id="viz-empty"
+                style="text-align:center; padding:3rem; color:var(--text-tertiary);">
+                <i class="fas fa-chart-area fa-3x mb-3"></i>
+                <p>Select a dataset to view Utilization Map & Visualizations.</p>
+            </div>
+            <div id="viz-content" style="display:none;">
+
+                <!-- Utilization Header -->
+                <div class="dashboard-grid mb-3">
+                    <div class="col-span-2 card-flat white-panel">
+                        <h6 class="mb-2"><i class="fas fa-network-wired"></i> Integration Map</h6>
+                        <div id="integration-list" style="display:flex; gap:1rem; flex-wrap:wrap;">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <h6 class="text-muted text-sm">Utilization Score</h6>
+                        <h3 id="util-score" class="text-blue-600">0%</h3>
+                    </div>
+                </div>
+
+                <div class="chart-container white-panel card-flat" style="height:350px; margin-bottom:1.5rem;">
+                    <div class="flex-between mb-2">
+                        <h6 class="mb-0">Global Distribution</h6>
+                        <span class="text-xs text-muted"><i class="fas fa-info-circle"></i> Sampling: First 1000
+                            rows</span>
+                    </div>
+                    <canvas id="globalVizChart"></canvas>
+                </div>
+
+                <div class="stats-grid dashboard-grid">
+                    <div class="stat-card">
+                        <h6>Total Rows</h6>
+                        <h4 id="viz-stat-rows">-</h4>
+                    </div>
+                    <div class="stat-card">
+                        <h6>Columns</h6>
+                        <h4 id="viz-stat-cols">-</h4>
+                    </div>
+                    <div class="stat-card">
+                        <h6>Last Accessed</h6>
+                        <h4 id="viz-last-access">-</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: ROLE WORKSPACE -->
+        <div id="view-roles" class="main-view animate-fade-in"
+            style="height:100%; display:none; flex-direction:column;">
+
+            <div id="role-empty" class="empty-state"
+                style="text-align:center; padding:3rem; color:var(--text-tertiary);">
+                <i class="fas fa-briefcase fa-3x mb-3"></i>
+                <p>No dataset active. Select one from <b>Data Sources</b>.</p>
+            </div>
+
+            <div id="role-content" style="display:none; flex:1; flex-direction:column; overflow:hidden;">
+                <!-- Sticky Header with Role Tabs -->
+                <div class="preview-header"
+                    style="margin-bottom: 0; padding-bottom: 0; border-bottom: none; background:var(--bg-primary);">
+                    <div style="padding: 0 0 1rem 0; display:flex; justify-content:space-between; align-items:center;">
+                        <h3 id="dataset-name" style="font-size: 1.5rem; margin: 0;">Dataset</h3>
+                        <div style="display:flex; align-items:center; gap:1rem;">
+                            <!-- Cross-App Tools -->
+                            <div class="dropdown-sim" style="position:relative; display:inline-block;">
+                                <button class="btn small secondary"><i class="fas fa-th"></i> App Tools</button>
+                                <div class="dropdown-content"
+                                    style="display:none; position:absolute; right:0; top:100%; background:white; border:1px solid #ddd; padding:0.5rem; width:200px; z-index:100; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                                    <a href="/training" class="block p-2 hover:bg-gray-100 text-sm"><i
+                                            class="fas fa-brain"></i> Open Training</a>
+                                    <a href="/chat" class="block p-2 hover:bg-gray-100 text-sm"><i
+                                            class="fas fa-comments"></i> Send to Chat</a>
+                                    <a href="/settings" class="block p-2 hover:bg-gray-100 text-sm"><i
+                                            class="fas fa-cog"></i> Config</a>
+                                </div>
+                            </div>
+                            <span class="badge" id="wk-status-badge">Active</span>
+                        </div>
+                    </div>
+
+                    <div class="role-selector-wrapper" style="border-bottom: 1px solid var(--border-color);">
+                        <div class="role-selector tabs-nav" style="display:flex; gap: 1.5rem; overflow-x: auto;">
+                            <button class="tab-btn active" data-role="overview"><i class="fas fa-home"></i>
+                                Overview</button>
+                            <button class="tab-btn" data-role="entry"><i class="fas fa-keyboard"></i> Entry</button>
+                            <button class="tab-btn" data-role="engineer"><i class="fas fa-cogs"></i> Engineer</button>
+                            <button class="tab-btn" data-role="analyst"><i class="fas fa-chart-line"></i>
+                                Analyst</button>
+                            <button class="tab-btn" data-role="scientist"><i class="fas fa-flask"></i>
+                                Scientist</button>
+                            <button class="tab-btn" data-role="mlops"><i class="fas fa-server"></i> MLOps</button>
+                            <button class="tab-btn" data-role="architect"><i class="fas fa-sitemap"></i>
+                                Architect</button>
+                            <button class="tab-btn" data-role="dba"><i class="fas fa-shield-alt"></i> DBA</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Role Panels Container -->
+                <div class="panels-container custom-scrollbar"
+                    style="flex:1; overflow-y:auto; background:white; border-radius:0 0 12px 12px; border:1px solid var(--border-color); border-top:none;">
+
+                    <!-- 1. Overview Panel -->
+                    <div class="role-panel active animate-fade-in" id="panel-overview">
+                        <div class="stats-grid dashboard-grid mb-3" id="active-stats">
+                            <div class="stat-card p-3 border rounded bg-white">
+                                <span class="text-muted text-sm">Size</span>
+                                <h4 id="stat-size">-</h4>
+                            </div>
+                            <div class="stat-card p-3 border rounded bg-white">
+                                <span class="text-muted text-sm">Rows</span>
+                                <h4 id="stat-rows">-</h4>
+                            </div>
+                            <div class="stat-card p-3 border rounded bg-white">
+                                <span class="text-muted text-sm">Columns</span>
+                                <h4 id="stat-cols">-</h4>
+                            </div>
+                        </div>
+
+                        <div class="actions-bar mb-3" style="display:flex; gap:1rem;">
+                            <button class="btn primary small" id="btn-index"><i class="fas fa-database"></i> Index to
+                                RAG</button>
+                            <button class="btn secondary small" id="btn-export"><i class="fas fa-download"></i> Export
+                                CSV</button>
+                            <button class="btn destructive small" id="btn-delete"><i class="fas fa-trash"></i>
+                                Delete</button>
+                        </div>
+
+                        <div class="table-container border rounded" id="preview-table-container"
+                            style="overflow:auto; max-height: 500px;">
+                            <table id="preview-table" class="table">
+                                <thead></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 2. Data Entry Panel -->
+                    <div class="role-panel animate-fade-in" id="panel-entry" style="display:none;">
+                        <div class="panel-intro mb-3">
+                            <h5><i class="fas fa-keyboard"></i> Data Entry & Maintenance</h5>
+                            <p class="text-muted">Digitize records, add new data, and verify accuracy.</p>
+                        </div>
+
+                        <!-- Real-time Ingestion Sim -->
+                        <div class="realtime-box card-flat white-panel mb-3"
+                            style="border-left: 4px solid var(--accent-primary);">
+                            <div class="flex-between"
+                                style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <h6 class="mb-1"><i class="fas fa-bolt text-yellow-500"></i> Real-time Ingestion
+                                        Simulator</h6>
+                                    <p class="text-xs text-muted">Simulate live data stream (1 row/2s)</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="toggle-ingest">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div id="ingest-stats" class="mt-2 text-xs font-mono" style="display:none;">
+                                Status: <span class="text-green-600">Active</span> | Rows Added: <span
+                                    id="ingest-count">0</span>
+                            </div>
+                        </div>
+
+                        <div class="entry-form card-flat white-panel">
+                            <h6 class="mb-3">Add New Record</h6>
+                            <div id="entry-form-fields" class="form-grid dashboard-grid mb-3">
+                                <!-- Dynamic Fields -->
+                            </div>
+                            <button class="btn primary small" id="btn-add-row"><i class="fas fa-plus"></i> Add
+                                Row</button>
+                        </div>
+                    </div>
+
+                    <!-- 3. Data Engineer Panel -->
+                    <div class="role-panel animate-fade-in" id="panel-engineer" style="display:none;">
+                        <div class="panel-intro">
+                            <h5><i class="fas fa-tools"></i> Data Preparation</h5>
+                            <p class="text-muted">Build resilient data pipelines.</p>
+                        </div>
+
+                        <div class="sub-nav-header">
+                            <button class="sub-tab active" data-target="eng-clean"><i class="fas fa-magic"></i>
+                                Auto-Clean</button>
+                            <button class="sub-tab" data-target="eng-transform"><i class="fas fa-random"></i>
+                                Transforms</button>
+                            <button class="sub-tab" data-target="eng-history"><i class="fas fa-history"></i> Pipe
+                                History</button>
+                        </div>
+
+                        <!-- Sub-View: Cleaning -->
+                        <div id="eng-clean" class="sub-view">
+                            <div class="control-group card-flat white-panel p-3 mb-3">
+                                <label class="block mb-2 font-bold">Standard Cleaning Suite</label>
+                                <div class="checkbox-group mb-3" style="display:flex; gap:1rem; flex-wrap:wrap;">
+                                    <label class="flex items-center gap-2"><input type="checkbox" id="clean-dedup"
+                                            checked> Drop Duplicates</label>
+                                    <label class="flex items-center gap-2"><input type="checkbox" id="clean-dropna"
+                                            checked> Drop NaN Rows</label>
+                                    <label class="flex items-center gap-2"><input type="checkbox" id="clean-fillna">
+                                        Fill NaN with 0</label>
+                                    <label class="flex items-center gap-2"><input type="checkbox" id="clean-strip">
+                                        Strip Whitespace</label>
+                                </div>
+                                <button class="btn primary" id="btn-run-clean"><i class="fas fa-play"></i> Run Cleaning
+                                    Job</button>
+                            </div>
+                            <div id="clean-results" class="results-box" style="display:none;"></div>
+                        </div>
+
+                        <!-- Sub-View: Transforms -->
+                        <div id="eng-transform" class="sub-view" style="display:none;">
+                            <div class="empty-state-small p-5 text-center text-muted border rounded bg-white">
+                                <i class="fas fa-code-branch fa-2x mb-2"></i>
+                                <p>No active transformations. Add a script step.</p>
+                            </div>
+                        </div>
+
+                        <!-- Sub-View: History -->
+                        <div id="eng-history" class="sub-view" style="display:none;">
+                            <div class="pipeline-viz">
+                                <div class="pipeline-step"><i class="fas fa-file-import"></i> Ingest</div>
+                                <i class="fas fa-arrow-right arrow-separator"></i>
+                                <div class="pipeline-step"><i class="fas fa-filter"></i> Clean</div>
+                                <i class="fas fa-arrow-right arrow-separator"></i>
+                                <div class="pipeline-step"><i class="fas fa-check-circle text-green-500"></i> Ready
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Data Analyst Panel -->
+                    <div class="role-panel animate-fade-in" id="panel-analyst" style="display:none;">
+                        <div class="panel-intro">
+                            <h5><i class="fas fa-chart-line"></i> Analytics & Insights</h5>
+                            <p class="text-muted">Uncover patterns through query and visualization.</p>
+                        </div>
+
+                        <div class="sub-nav-header">
+                            <button class="sub-tab active" data-target="ana-insights"><i class="fas fa-lightbulb"></i>
+                                Auto-Insights</button>
+                            <button class="sub-tab" data-target="ana-sql"><i class="fas fa-terminal"></i> SQL
+                                Lab</button>
+                            <button class="sub-tab" data-target="ana-viz"><i class="fas fa-chart-bar"></i>
+                                Visualizer</button>
+                        </div>
+
+                        <!-- Insights -->
+                        <div id="ana-insights" class="sub-view">
+                            <div class="card-flat white-panel mb-3" id="ai-insights-box">
+                                <div class="flex-between"
+                                    style="display:flex; justify-content:space-between; align-items:center;">
+                                    <h6 style="margin:0;">Generative Analysis</h6>
+                                    <button class="btn secondary small" id="btn-auto-insight">Run Analysis</button>
+                                </div>
+                                <div id="insights-result" class="insights-container mt-2">
+                                    <p class="text-sm text-muted">Click 'Run Analysis' to have AI scan your data for
+                                        correlations and anomalies.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SQL -->
+                        <div id="ana-sql" class="sub-view" style="display:none;">
+                            <label class="block mb-2 font-bold">Query Editor (DuckDB Dialect)</label>
+                            <textarea id="sql-query" class="code-editor form-input font-mono mb-3" rows="5"
+                                style="width:100%;">SELECT * FROM dataset LIMIT 10</textarea>
+                            <button class="btn secondary" id="btn-run-query"><i class="fas fa-play"></i>
+                                Execute</button>
+                            <div id="query-results" class="table-container small-height mt-3"></div>
+                        </div>
+
+                        <!-- Viz -->
+                        <div id="ana-viz" class="sub-view" style="display:none;">
+                            <div class="form-group mb-3">
+                                <label>Column Distribution</label>
+                                <select id="viz-column-select" class="form-select mb-2"
+                                    style="max-width:300px;"></select>
+                                <div class="chart-container" style="position:relative; height:300px;">
+                                    <canvas id="analystChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Data Scientist Panel -->
+                    <div class="role-panel animate-fade-in" id="panel-scientist" style="display:none;">
+                        <div class="panel-intro">
+                            <h5><i class="fas fa-flask"></i> Scientific Modeling</h5>
+                            <p class="text-muted">Experiment, Split, and Train.</p>
+                        </div>
+
+                        <div class="sub-nav-header">
+                            <button class="sub-tab active" data-target="sci-split"><i class="fas fa-cut"></i> Data
+                                Splits</button>
+                            <button class="sub-tab" data-target="sci-train"><i class="fas fa-robot"></i> AutoML</button>
+                        </div>
+
+                        <!-- Split -->
+                        <div id="sci-split" class="sub-view">
+                            <div class="stats-grid" id="scientific-stats"></div>
+                            <div class="control-group card-flat white-panel mt-3">
+                                <label class="block mb-2">Train/Test Ratio Strategy</label>
+                                <div class="slider-container"
+                                    style="display:flex; align-items:center; gap:1rem; padding: 1rem 0;">
+                                    <span class="text-xs font-bold text-muted">0%</span>
+                                    <input type="range" id="split-ratio" min="0.1" max="0.9" step="0.1" value="0.8"
+                                        style="flex:1;">
+                                    <span class="text-xs font-bold text-muted">100%</span>
+                                </div>
+                                <div class="text-center font-mono mb-3" style="color:var(--accent-primary);">
+                                    <span id="split-val">80% Train / 20% Test</span>
+                                </div>
+                                <button class="btn primary full-width" id="btn-run-split">Execute Split</button>
+                            </div>
+                            <div id="split-results" class="results-box mt-3" style="display:none;"></div>
+                        </div>
+
+                        <!-- Train -->
+                        <div id="sci-train" class="sub-view" style="display:none;">
+                            <div class="card-flat white-panel">
+                                <h6 class="mb-2">Baseline Model Training</h6>
+                                <div class="form-group mb-3">
+                                    <label>Target Variable</label>
+                                    <select id="train-target-col" class="form-select">
+                                        <option value="">Select Target...</option>
+                                    </select>
+                                </div>
+                                <button class="btn secondary full-width" id="btn-train-sim"><i class="fas fa-play"></i>
+                                    Start Training Simulation</button>
+                                <div id="train-results" class="results-box hidden mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. MLOps Engineer Panel -->
+                    <div class="role-panel animate-fade-in" id="panel-mlops" style="display:none;">
+                        <div class="panel-intro">
+                            <h5><i class="fas fa-server"></i> Operations</h5>
+                            <p class="text-muted">Manage versions and monitor drift.</p>
+                        </div>
+
+                        <div class="sub-nav-header">
+                            <button class="sub-tab active" data-target="ops-version"><i class="fas fa-code-branch"></i>
+                                Versioning</button>
+                            <button class="sub-tab" data-target="ops-drift"><i class="fas fa-wind"></i> Drift</button>
+                        </div>
+
+                        <div id="ops-version" class="sub-view">
+                            <div class="card-flat white-panel">
+                                <h6 class="mb-2">Create Snapshot</h6>
+                                <div class="input-group" style="display:flex; gap:0.5rem;">
+                                    <input type="text" id="version-tag" placeholder="v1.0.0" class="form-input flex-1">
+                                    <button class="btn primary" id="btn-create-version">Commit</button>
+                                </div>
+                                <div class="mt-3">
+                                    <label class="text-xs text-muted">History</label>
+                                    <div class="p-2 border rounded bg-white mt-1 text-sm">
+                                        <div class="flex justify-between mb-1"><span>v0.9-beta</span> <span
+                                                class="text-muted">2 mins ago</span></div>
+                                        <div class="flex justify-between"><span>initial-load</span> <span
+                                                class="text-muted">1 hour ago</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="ops-drift" class="sub-view" style="display:none;">
+                            <div class="card-flat white-panel">
+                                <h6 class="mb-2">Compare Distributions</h6>
+                                <div class="form-group mb-3">
+                                    <label>Baseline Dataset</label>
+                                    <select id="drift-file-select" class="form-select">
+                                        <option value="">Select baseline...</option>
+                                    </select>
+                                </div>
+                                <button class="btn secondary full-width" id="btn-check-drift">Run Drift
+                                    Analysis</button>
+                                <div id="drift-results" class="results-box mt-3" style="display:none;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Architect Panel -->
+                    <div class="role-panel animate-fade-in" id="panel-architect" style="display:none;">
+                        <div class="panel-intro mb-3">
+                            <h5><i class="fas fa-sitemap"></i> Data Architecture</h5>
+                            <p class="text-muted">Schema design, types, and metadata governance.</p>
+                        </div>
+                        <div class="table-container border rounded">
+                            <table id="schema-table">
+                                <thead>
+                                    <tr>
+                                        <th>Column</th>
+                                        <th>Type</th>
+                                        <th>Non-Null</th>
+                                        <th>Unique</th>
+                                        <th>Example</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 8. DBA Panel -->
+                    <div class="role-panel animate-fade-in" id="panel-dba" style="display:none;">
+                        <div class="panel-intro mb-3">
+                            <h5><i class="fas fa-shield-alt"></i> Database Administration</h5>
+                            <p class="text-muted">Security, backups, and performance monitoring.</p>
+                        </div>
+
+                        <div class="stats-grid dashboard-grid mb-3">
+                            <div class="stat-card p-3 border rounded bg-white">
+                                <h6 class="text-muted text-sm">System Status</h6>
+                                <span class="status-badge success font-bold text-green-600"><i class="fas fa-check"></i>
+                                    Healthy</span>
+                            </div>
+                            <div class="stat-card p-3 border rounded bg-white">
+                                <h6 class="text-muted text-sm">Last Backup</h6>
+                                <span id="dba-last-backup" class="font-mono">Never</span>
+                            </div>
+                            <div class="stat-card p-3 border rounded bg-white">
+                                <h6 class="text-muted text-sm">Access Level</h6>
+                                <span>Read/Write (Owner)</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group card-flat white-panel mb-3">
+                            <label class="block mb-2 font-bold">Disaster Recovery</label>
+                            <button class="btn primary full-width" id="btn-backup"><i class="fas fa-save"></i> Trigger
+                                Immediate
+                                Backup</button>
+                        </div>
+
+                        <div class="control-group card-flat white-panel">
+                            <label class="block mb-2 font-bold">Simulated Access Logs</label>
+                            <ul class="log-list font-mono text-xs" id="dba-logs"
+                                style="list-style:none; padding:0; line-height:1.5;">
+                                <li class="text-yellow-600"><span class="font-bold">WARN</span> Unauthorized access
+                                    attempt from
+                                    192.168.1.5</li>
+                                <li class="text-green-600"><span class="font-bold">INFO</span> User 'Architect' modified
+                                    schema
+                                </li>
+                                <li class="text-green-600"><span class="font-bold">INFO</span> Daily ETL job completed
+                                    successfully</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/datasets.js') }}"></script>
+{% endblock %}

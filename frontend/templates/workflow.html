@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Workflow Designer - NeuroForge{% endblock %}
+{% block breadcrumbs %}Lab / Architect / Workflow{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/workflow.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="workflow-layout animate-fade-in"
+    style="height: calc(100vh - 80px); display: flex; flex-direction: column; overflow: hidden; margin: -2rem;">
+    <!-- Toolbar / Header -->
+    <div class="workflow-header glass-header"
+        style="height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; z-index: 10;">
+        <div style="display:flex; align-items:center; gap:1rem;">
+            <h3 style="margin:0;">Agent Builder</h3>
+            <span class="badge text-muted"
+                style="border:1px solid var(--border-color); padding:0.1rem 0.5rem; border-radius:4px; font-size:0.75rem;">v0.2</span>
+        </div>
+        <div class="actions" style="display:flex; gap:0.5rem;">
+            <button class="btn secondary small" onclick="clearCanvas()"><i class="fas fa-trash"></i> Clear</button>
+            <div class="divider-v" style="width:1px; background:var(--border-color); margin:0 0.5rem;"></div>
+            <button class="btn secondary small" onclick="testFlow()"><i class="fas fa-play"></i> Test Flow</button>
+            <button class="btn primary small"><i class="fas fa-save"></i> Save Agent</button>
+        </div>
+    </div>
+
+    <div class="workflow-body" style="flex: 1; display: flex; position: relative;">
+        <!-- Node Palette -->
+        <div class="nodes-palette glass-panel custom-scrollbar"
+            style="width: 250px; border-right: 1px solid var(--border-color); padding: 1rem; overflow-y: auto; background: rgba(255,255,255,0.9);">
+            <h4 class="mb-3 text-sm uppercase tracking-wide text-muted font-bold">Toolbox</h4>
+
+            <div class="palette-category mb-4">
+                <h5 class="text-xs text-muted mb-2 font-bold"><i class="fas fa-exchange-alt"></i> Inputs & Outputs</h5>
+                <div class="draggable-node card-flat p-2 mb-2 cursor-grab hover:shadow-md transition-all border border-gray-200 bg-white"
+                    draggable="true" data-type="input">
+                    <i class="fas fa-file-alt text-blue-500 mr-2"></i> File Reader
+                </div>
+                <div class="draggable-node card-flat p-2 mb-2 cursor-grab hover:shadow-md transition-all border border-gray-200 bg-white"
+                    draggable="true" data-type="web">
+                    <i class="fas fa-globe text-blue-500 mr-2"></i> Web Connector
+                </div>
+            </div>
+
+            <div class="palette-category mb-4">
+                <h5 class="text-xs text-muted mb-2 font-bold"><i class="fas fa-brain"></i> Intelligence</h5>
+                <div class="draggable-node card-flat p-2 mb-2 cursor-grab hover:shadow-md transition-all border border-gray-200 bg-white"
+                    draggable="true" data-type="llm">
+                    <i class="fas fa-microchip text-purple-500 mr-2"></i> LLM Inference
+                </div>
+                <div class="draggable-node card-flat p-2 mb-2 cursor-grab hover:shadow-md transition-all border border-gray-200 bg-white"
+                    draggable="true" data-type="vector">
+                    <i class="fas fa-database text-green-500 mr-2"></i> Vector Store
+                </div>
+            </div>
+
+            <div class="palette-category mb-4">
+                <h5 class="text-xs text-muted mb-2 font-bold"><i class="fas fa-tools"></i> Processing</h5>
+                <div class="draggable-node card-flat p-2 mb-2 cursor-grab hover:shadow-md transition-all border border-gray-200 bg-white"
+                    draggable="true" data-type="chunker">
+                    <i class="fas fa-cut text-orange-500 mr-2"></i> Text Chunker
+                </div>
+                <div class="draggable-node card-flat p-2 mb-2 cursor-grab hover:shadow-md transition-all border border-gray-200 bg-white"
+                    draggable="true" data-type="router">
+                    <i class="fas fa-random text-gray-500 mr-2"></i> Logic Router
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas -->
+        <div class="canvas-container relative flex-1 bg-slate-50 overflow-hidden" id="main-canvas"
+            style="flex:1; position:relative; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px;">
+
+            <!-- SVG Layer for connections -->
+            <svg id="connections-layer"
+                style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index: 0;"></svg>
+
+            <!-- Floating Controls -->
+            <div class="canvas-controls"
+                style="position: absolute; bottom: 2rem; right: 2rem; display: flex; gap: 0.5rem; background: white; padding: 0.5rem; border-radius: 999px; box-shadow: var(--shadow-lg); z-index: 20;">
+                <button class="btn icon-only small secondary"><i class="fas fa-search-minus"></i></button>
+                <div style="align-self:center; font-size:0.8rem; padding:0 0.5rem;">100%</div>
+                <button class="btn icon-only small secondary"><i class="fas fa-search-plus"></i></button>
+            </div>
+
+            <!-- Dynamic Node Container -->
+            <div id="nodes-layer" style="position: absolute; top:0; left:0; width: 100%; height: 100%; z-index: 10;">
+            </div>
+        </div>
+
+        <!-- Properties Panel (Right Sidebar) -->
+        <div id="properties-panel" class="properties-panel glass-panel border-l border-gray-200 bg-white"
+            style="width: 300px; display: none; flex-direction: column; border-left: 1px solid var(--border-color); background: white;">
+            <div class="panel-header p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50"
+                style="padding:1rem;">
+                <h4 class="font-bold text-sm uppercase text-gray-600">Properties</h4>
+                <button class="text-gray-400 hover:text-gray-600" onclick="hideProperties()"><i
+                        class="fas fa-times"></i></button>
+            </div>
+
+            <div class="panel-body p-4 flex-1 overflow-y-auto" id="props-content" style="padding:1rem; flex:1;">
+                <!-- Content injected by JS -->
+            </div>
+
+            <div class="panel-footer p-4 border-t border-gray-100" style="padding:1rem;">
+                <button class="btn primary full-width" onclick="saveProperties()">Apply Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Logs Panel -->
+    <div id="logs-panel"
+        class="logs-panel glass-panel border-t border-gray-200 bg-black text-xs font-mono text-green-400 p-0"
+        style="height: 150px; display: flex; flex-direction: column; background: #0f172a; color: #22c55e; border-top: 1px solid var(--border-color);">
+        <div class="logs-header bg-gray-900 p-2 flex justify-between items-center select-none cursor-pointer"
+            style="background: #1e293b; padding: 0.5rem 1rem;">
+            <span class="font-bold"><i class="fas fa-terminal mr-2"></i> Execution Console</span>
+            <div class="flex gap-2">
+                <span class="badge badge-xs badge-success">Idle</span>
+            </div>
+        </div>
+        <div class="logs-content flex-1 p-2 overflow-y-auto" id="console-output"
+            style="padding:1rem; font-family: monospace;">
+            <div class="log-line text-gray-500" style="color: #64748b;">> System initialized. Ready to build agents.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/workflow.js') }}"></script>
+{% endblock %}

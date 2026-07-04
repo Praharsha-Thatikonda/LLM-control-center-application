@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Evaluation - NeuroForge{% endblock %}
+{% block breadcrumbs %}Lab / Quality Assurance / Evaluation{% endblock %}
+
+{% block extra_head %}
+<!-- Reuse training CSS for now or specific evaluation CSS if needed -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/training.css') }}">
+<style>
+    .eval-layout {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 2rem;
+        height: calc(100vh - 140px);
+    }
+
+    .eval-config {
+        overflow-y: auto;
+    }
+
+    .eval-results {
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .result-row {
+        background: #fff;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+    }
+
+    .metrics-tags {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .metric-tag {
+        background: #f1f5f9;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="eval-layout">
+    <div class="eval-config card">
+        <h3>Bulk Run Configuration</h3>
+        <form class="config-form" id="run-eval-form">
+            <div class="form-group">
+                <label>Run Name</label>
+                <input type="text" name="name" class="form-input" placeholder="e.g. Q3 Model Test">
+            </div>
+
+            <div class="form-section">
+                <h4>Models to Compare</h4>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="m1" name="models" value="llama-3-8b" checked>
+                    <label for="m1">Llama 3 8B</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="m2" name="models" value="mistral-7b">
+                    <label for="m2">Mistral 7B</label>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h4>Test Dataset</h4>
+                <select class="form-select" name="dataset_id">
+                    <option value="test_set_v1">General QA Test Set (50 items)</option>
+                    <option value="coding_set">Coding Challenges (20 items)</option>
+                </select>
+            </div>
+
+            <button type="button" class="btn primary full-width" onclick="startEvaluation()">Run Evaluation</button>
+        </form>
+    </div>
+
+    <div class="eval-results">
+        <div class="card">
+            <div class="card-header" style="justify-content: space-between; display: flex;">
+                <h3>Results History</h3>
+                <button class="btn sm secondary" onclick="loadEvaluations()"><i class="fas fa-sync"></i>
+                    Refresh</button>
+            </div>
+            <div id="eval-list">
+                <!-- Populated via JS -->
+                <div class="loading-placeholder">Loading past evaluations...</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', loadEvaluations);
+
+    async function startEvaluation() {
+        const btn = document.querySelector('.btn.primary');
+        const originalText = btn.innerText;
+        btn.innerText = 'Running...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/v1/evaluation/run', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: document.querySelector('input[name="name"]').value,
+                    dataset_id: document.querySelector('select[name="dataset_id"]').value,
+                    model_ids: ['llama-3-8b'] // Mock for now
+                })
+            });
+            const data = await res.json();
+            alert('Evaluation complete! Run ID: ' + data.id);
+            loadEvaluations();
+        } catch (e) {
+            alert('Failed to run evaluation');
+            console.error(e);
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    async function loadEvaluations() {
+        const container = document.getElementById('eval-list');
+        try {
+            const res = await fetch('/api/v1/evaluation/');
+            const evals = await res.json();
+
+            if (evals.length === 0) {
+                container.innerHTML = '<p style="padding:1rem; color:#64748b;">No evaluations runs found.</p>';
+                return;
+            }
+
+            container.innerHTML = evals.map(e => `
+                <div class="result-row">
+                    <div style="display:flex; justify-content:space-between;">
+                        <strong>${e.name}</strong>
+                        <span class="badge ${e.status === 'completed' ? 'success' : 'warning'}">${e.status}</span>
+                    </div>
+                    <p style="font-size:0.9rem; color:#64748b; margin:0.5rem 0;">Dataset: ${e.dataset_id}</p>
+                    <div class="metrics-tags">
+                        <span class="metric-tag"><i class="fas fa-check"></i> F1: 0.92</span>
+                        <span class="metric-tag"><i class="fas fa-brain"></i> Coherence: 0.95</span>
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            console.error(e);
+            container.innerHTML = '<p class="error">Failed to load history.</p>';
+        }
+    }
+</script>
+{% endblock %}

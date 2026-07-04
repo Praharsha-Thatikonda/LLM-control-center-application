@@ -1,0 +1,542 @@
+{% extends "base.html" %}
+
+{% block title %}Training - NeuroForge{% endblock %}
+{% block breadcrumbs %}Lab / Training Refinery{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/training.css') }}">
+<style>
+    /* Professional UI Overrides */
+
+    /* 1. Glass Container & Sticky Headers */
+    .glass-header {
+        background: rgba(18, 18, 24, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        z-index: 50;
+    }
+
+    /* 2. Sleek Tab Navigation */
+    .sticky-nav {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        padding-bottom: 0.5rem;
+    }
+
+    .pill-nav {
+        display: inline-flex;
+        gap: 0.5rem;
+        padding: 0.35rem 0.5rem;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 99px;
+        /* Fully rounded/pill */
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        overflow-x: auto;
+        max-width: 100%;
+        scrollbar-width: none;
+        /* Hide scrollbar Firefox */
+    }
+
+    .pill-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Hide Chrome */
+
+    .tab-btn {
+        background: transparent;
+        border: 1px solid transparent;
+        color: #94a3b8;
+        /* Text muted */
+        padding: 0.5rem 1.25rem;
+        border-radius: 99px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .tab-btn:hover {
+        color: #e2e8f0;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+        background: linear-gradient(135deg, var(--accent-primary) 0%, #2563eb 100%);
+        color: white;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        /* Subtle glow */
+        border-color: rgba(255, 255, 255, 0.1);
+        font-weight: 600;
+        transform: translateY(-1px);
+    }
+
+    .tab-btn i {
+        font-size: 0.9em;
+        opacity: 0.9;
+    }
+
+    /* 3. Toolbar & Inputs */
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .search-box input {
+        transition: all 0.2s;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .search-box input:focus {
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    /* 4. Dashboard Grid & Cards */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .selectable-card {
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .selectable-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.4);
+    }
+
+    .selectable-card.selected {
+        background: linear-gradient(160deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 1px var(--accent-primary), 0 8px 16px -4px rgba(59, 130, 246, 0.2);
+    }
+
+    /* 5. Nav Actions (Buttons) */
+    .nav-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .process-table th {
+        color: #94a3b8;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .process-table td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    /* Animation */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .tab-pane {
+        animation: slideIn 0.3s ease-out;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="models-layout animate-fade-in">
+    <div class="page-header glass-header" style="margin: -2rem -2rem 2rem -2rem; padding: 1.5rem 2rem;">
+        <div class="header-content">
+            <h2>Training Refinery</h2>
+            <p class="text-muted text-sm">Advanced fine-tuning and model training workflow</p>
+        </div>
+        <!-- Updated Sticky Pill Nav Container -->
+        <div class="sticky-nav mt-3">
+            <div class="pill-nav">
+                <button class="tab-btn active" data-tab="models-tab"><i class="fas fa-cube"></i> Models</button>
+                <button class="tab-btn" data-tab="model-specs-tab"><i class="fas fa-info-circle"></i> Specs</button>
+                <button class="tab-btn" data-tab="model-config-tab"><i class="fas fa-cogs"></i> Model Config</button>
+                <button class="tab-btn" data-tab="datasets-tab"><i class="fas fa-database"></i> Datasets</button>
+                <button class="tab-btn" data-tab="data-config-tab"><i class="fas fa-sliders-h"></i> Data Config</button>
+                <button class="tab-btn" data-tab="train-config-tab"><i class="fas fa-fire"></i> Training Config</button>
+                <button class="tab-btn" data-tab="logs-tab"><i class="fas fa-terminal"></i> Logs</button>
+                <button class="tab-btn" data-tab="system-tab"><i class="fas fa-microchip"></i> System</button>
+                <button class="tab-btn" data-tab="checkpoints-tab"><i class="fas fa-save"></i> Checkpoints</button>
+                <button class="tab-btn" data-tab="history-tab"><i class="fas fa-history"></i> History</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS CONTENT -->
+    <div class="tab-content" style="height: calc(100vh - 220px); overflow-y:auto;">
+
+        <!-- 1. MODELS TAB (Selection) -->
+        <div id="models-tab" class="tab-pane active">
+            <div class="toolbar glass-panel mb-3"
+                style="display:flex; gap:1rem; padding:1rem; border-radius:var(--radius-md); align-items:center;">
+                <div class="search-wrapper" style="flex:1;">
+                    <i class="fas fa-search text-muted" style="position:absolute; padding: 12px;"></i>
+                    <input type="text" id="model-search" class="search-input" placeholder="Search models..."
+                        style="padding-left: 2.5rem; width:100%;">
+                </div>
+                <button class="btn secondary" onclick="loadModels()"><i class="fas fa-sync"></i> Refresh</button>
+                <button class="btn primary"><i class="fas fa-plus"></i> Import</button>
+            </div>
+            <div class="dashboard-grid" id="training-models-list">
+                <!-- Populated via JS -->
+                <div class="loading-placeholder">Loading Models...</div>
+            </div>
+        </div>
+
+        <!-- 2. MODEL SPECS TAB -->
+        <div id="model-specs-tab" class="tab-pane" style="display:none;">
+            <div class="card glass-panel">
+                <h3 class="mb-3">Model Specifications</h3>
+                <div id="selected-model-specs">
+                    <p class="text-muted">Select a model from the 'Models' tab to view specifications.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. MODEL CONFIG TAB -->
+        <div id="model-config-tab" class="tab-pane" style="display:none;">
+            <div class="card glass-panel" style="max-width:600px; margin:0 auto;">
+                <h3 class="mb-3">Model Configuration</h3>
+                <div class="form-group mb-3">
+                    <label class="block text-sm font-medium mb-1">Quantization</label>
+                    <select class="form-select" id="conf-quant">
+                        <option value="4bit" selected>4-bit (QLoRA)</option>
+                        <option value="8bit">8-bit</option>
+                        <option value="none">None (FP16)</option>
+                    </select>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="block text-sm font-medium mb-1">Target Modules (LoRA)</label>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                        <label><input type="checkbox" checked> q_proj</label>
+                        <label><input type="checkbox" checked> v_proj</label>
+                        <label><input type="checkbox"> k_proj</label>
+                        <label><input type="checkbox"> o_proj</label>
+                    </div>
+                </div>
+                <div class="form-group mb-3">
+                    <div class="checkbox-group mb-2" style="display:flex; align-items:center; gap:0.5rem;">
+                        <input type="checkbox" id="fp16" checked class="accent-primary">
+                        <label for="fp16" class="text-sm">Use FP16 / Mixed Precision</label>
+                    </div>
+                    <div class="checkbox-group" style="display:flex; align-items:center; gap:0.5rem;">
+                        <input type="checkbox" id="qlora" checked class="accent-primary">
+                        <label for="qlora" class="text-sm">Use QLoRA (4-bit)</label>
+                    </div>
+                </div>
+                <div class="nav-actions">
+                    <button class="btn secondary"
+                        onclick="document.querySelector('[data-tab=\'model-specs-tab\']').click()">Back</button>
+                    <button class="btn primary"
+                        onclick="document.querySelector('[data-tab=\'datasets-tab\']').click()">Next: Select
+                        Dataset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. DATASETS TAB (Selection) -->
+        <div id="datasets-tab" class="tab-pane" style="display:none;">
+            <div class="toolbar glass-panel mb-3"
+                style="display:flex; gap:1rem; padding:1rem; border-radius:var(--radius-md); align-items:center;">
+                <div class="search-wrapper" style="flex:1;">
+                    <i class="fas fa-search text-muted" style="position:absolute; padding: 12px;"></i>
+                    <input type="text" id="dataset-search" class="search-input" placeholder="Search datasets..."
+                        style="padding-left: 2.5rem; width:100%;">
+                </div>
+                <button class="btn secondary" onclick="loadDatasets()"><i class="fas fa-sync"></i> Refresh</button>
+                <button class="btn primary"><i class="fas fa-upload"></i> Upload</button>
+            </div>
+            <div class="dashboard-grid" id="training-datasets-list">
+                <!-- Populated via JS -->
+                <div class="loading-placeholder">Loading Datasets...</div>
+            </div>
+        </div>
+
+        <!-- 5. DATA CONFIG TAB -->
+        <div id="data-config-tab" class="tab-pane" style="display:none;">
+            <div class="card glass-panel" style="max-width:600px; margin:0 auto;">
+                <h3 class="mb-3">Dataset Configuration</h3>
+                <div class="form-group mb-3">
+                    <label class="block text-sm font-medium mb-1">Context Window</label>
+                    <input type="number" class="form-input" value="4096">
+                </div>
+                <div class="form-group mb-3">
+                    <label class="block text-sm font-medium mb-1">Train/Test Split</label>
+                    <input type="range" min="50" max="99" value="90" class="form-range"
+                        oninput="this.nextElementSibling.value = this.value + '%'">
+                    <output>90%</output>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="block text-sm font-medium mb-1">Packing Strategy</label>
+                    <select class="form-select">
+                        <option>No Packing</option>
+                        <option>Sequence Packing (Faster)</option>
+                    </select>
+                </div>
+                <div class="nav-actions">
+                    <button class="btn secondary"
+                        onclick="document.querySelector('[data-tab=\'datasets-tab\']').click()">Back</button>
+                    <button class="btn primary"
+                        onclick="document.querySelector('[data-tab=\'train-config-tab\']').click()">Next: Training
+                        Config</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. TRAINING CONFIG TAB (Main Form) -->
+        <div id="train-config-tab" class="tab-pane" style="display:none;">
+            <div class="card glass-panel" style="max-width:600px; margin:0 auto;">
+                <h3 class="mb-3">Training Hyperparameters</h3>
+                <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium mb-1">Epochs</label>
+                        <input type="number" id="conf-epochs" value="3" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="block text-sm font-medium mb-1">Batch Size</label>
+                        <input type="number" id="conf-batch" value="4" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="block text-sm font-medium mb-1">Learning Rate</label>
+                        <input type="text" id="conf-lr" value="2e-4" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="block text-sm font-medium mb-1">Gradient Accumulation</label>
+                        <input type="number" value="1" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="block text-sm font-medium mb-1">Optimizer</label>
+                        <select class="form-select">
+                            <option>AdamW</option>
+                            <option>Adam</option>
+                            <option>SGD</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="block text-sm font-medium mb-1">Scheduler</label>
+                        <select class="form-select">
+                            <option>Cosine</option>
+                            <option>Linear</option>
+                            <option>Constant</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="block text-sm font-medium mb-1">LoRA Rank</label>
+                        <input type="number" value="16" class="form-input">
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-700">
+                    <div class="summary mb-3 p-3 rounded" style="background:rgba(0,0,0,0.2);">
+                        <strong>Ready to Train:</strong>
+                        <div id="summary-text" class="text-sm text-muted">Select a model and dataset first.</div>
+                    </div>
+                    <button type="button" class="btn primary full-width py-3 text-lg shadow-lg"
+                        id="btn-start-training">Start Training Run</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. LOGS TAB -->
+        <div id="logs-tab" class="tab-pane" style="display:none;">
+            <div class="training-viz-area"
+                style="height:100%; display: grid; grid-template-rows: 2fr 1fr; gap: 1.5rem;">
+                <div class="card white-panel" style="position:relative; display:flex; flex-direction:column;">
+                    <h3 class="flex justify-between items-center">
+                        <span>Loss Curve</span>
+                        <span class="badge"
+                            style="background:var(--accent-success); color:white; padding:0.25rem 0.5rem; border-radius:4px; font-size:0.75rem;">LIVE</span>
+                    </h3>
+                    <div class="chart-container" style="flex:1; position:relative; min-height:0;">
+                        <canvas id="lossChart"></canvas>
+                    </div>
+                </div>
+                <div class="card logs-card custom-scrollbar"
+                    style="background:#1e1e1e; color:#f0f0f0; font-family:'Fira Code', monospace; overflow-y:auto; padding:1.5rem;">
+                    <h3
+                        style="color:#a0aec0; font-size:0.9rem; text-transform:uppercase; margin-bottom:1rem; border-bottom:1px solid #333; padding-bottom:0.5rem;">
+                        <i class="fas fa-terminal"></i> Terminal Output
+                    </h3>
+                    <div class="console-output" style="font-size:0.85rem; line-height:1.6;">
+                        <div class="log-line text-blue-400">[10:00:22] System: Allocating VRAM...</div>
+                        <div class="log-line text-green-400">[10:00:25] Trainer: Loaded Llama-3-8B (4-bit)</div>
+                        <div class="log-line text-gray-400">[10:00:26] Data: Preprocessing 12k samples...</div>
+                        <div class="log-line"><span style="color:#f59e0b;">Epoch 1/3</span> | Step 10/3000 | Loss:
+                            2.341
+                        </div>
+                        <div class="log-line"><span style="color:#f59e0b;">Epoch 1/3</span> | Step 20/3000 | Loss:
+                            1.982
+                        </div>
+                        <div class="log-line typing-cursor">_</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. SYSTEM TAB -->
+        <div id="system-tab" class="tab-pane" style="display:none;">
+            <div class="card glass-panel mb-3">
+                <h3>Hardware Monitor</h3>
+                <div class="monitor-row mt-4" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                    <div class="card-flat white-panel" style="padding:2rem;">
+                        <div class="flex-between mb-2">
+                            <span class="text-lg">GPU Utilization</span>
+                            <strong id="mon-gpu-val" class="text-blue-600 text-xl">0%</strong>
+                        </div>
+                        <div class="progress-bar-bg" style="background:#eee; height:12px; border-radius:6px;">
+                            <div id="mon-gpu-bar"
+                                style="width:0%; background:var(--accent-primary); height:100%; border-radius:6px;">
+                            </div>
+                        </div>
+                        <div class="mt-2 text-muted" id="mon-vram-val">VRAM: 0GB / 24GB</div>
+                    </div>
+                    <div class="card-flat white-panel" style="padding:2rem;">
+                        <div class="flex-between mb-2">
+                            <span class="text-lg">System RAM</span>
+                            <strong id="mon-ram-val" class="text-green-600 text-xl">0 GB</strong>
+                        </div>
+                        <div class="progress-bar-bg" style="background:#eee; height:12px; border-radius:6px;">
+                            <div id="mon-ram-bar"
+                                style="width:0%; background:var(--accent-success); height:100%; border-radius:6px;">
+                            </div>
+                        </div>
+                        <div class="mt-2 text-muted" id="mon-cpu-val">CPU: 0%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card glass-panel" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+                <div>
+                    <h3 class="mb-3">System Info</h3>
+                    <pre style="background:rgba(0,0,0,0.1); padding:1rem; border-radius:8px;">
+OS: Windows 11
+Python: 3.10.12
+PyTorch: 2.1.2+cu121
+Device: NVIDIA RTX 4090 (24GB)
+                    </pre>
+                </div>
+                <div>
+                    <h3 class="mb-3">Active Processes</h3>
+                    <table class="table process-table" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>PID</th>
+                                <th>Name</th>
+                                <th>VRAM</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1120</td>
+                                <td>python.exe (Training)</td>
+                                <td>16.4 GB</td>
+                                <td class="text-green-400">Running</td>
+                            </tr>
+                            <tr>
+                                <td>892</td>
+                                <td>ollama_service</td>
+                                <td>4.2 GB</td>
+                                <td class="text-blue-400">Idle</td>
+                            </tr>
+                            <tr>
+                                <td>334</td>
+                                <td>system_kernel</td>
+                                <td>0.5 GB</td>
+                                <td class="text-muted">Background</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. CHECKPOINTS TAB -->
+        <div id="checkpoints-tab" class="tab-pane" style="height:100%; display:none;">
+            <div class="card-flat white-panel" style="height:100%;">
+                <div class="flex-between mb-3">
+                    <h3>Saved Checkpoints</h3>
+                    <button class="btn secondary refresh-ckpt-btn"><i class="fas fa-sync"></i> Refresh</button>
+                </div>
+                <div class="table-container border rounded" style="overflow:auto; max-height:80vh;">
+                    <table class="table" id="ckpt-table">
+                        <thead>
+                            <tr>
+                                <th>Checkpoint Name</th>
+                                <th>Created</th>
+                                <th>Loss</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. HISTORY TAB -->
+        <div id="history-tab" class="tab-pane" style="height:100%; display:none;">
+            <div class="card-flat white-panel" style="height:100%;">
+                <div class="flex-between mb-3">
+                    <h3>Training Run History</h3>
+                    <button class="btn secondary refresh-hist-btn"><i class="fas fa-sync"></i> Refresh</button>
+                </div>
+                <div class="table-container border rounded">
+                    <table class="table" id="hist-table">
+                        <thead>
+                            <tr>
+                                <th>Run ID</th>
+                                <th>Model</th>
+                                <th>Status</th>
+                                <th>Duration</th>
+                                <th>Final Loss</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/training.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}About - NeuroForge{% endblock %}
+{% block breadcrumbs %}System / About{% endblock %}
+
+{% block extra_head %}
+<style>
+    .about-hero {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(59, 130, 246, 0.05) 100%);
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+
+    .hero-logo-box {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--accent-primary), #2563eb);
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2.5rem;
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        margin-bottom: 1.5rem;
+    }
+
+    .grid-stack {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .stack-item {
+        padding: 1rem;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .stack-item i {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        display: block;
+        color: var(--text-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="models-layout animate-fade-in">
+    <div class="card glass-panel about-hero">
+        <div class="hero-logo-box">
+            <i class="fas fa-brain"></i>
+        </div>
+        <h1 style="font-size: 2.5rem; font-weight:800; margin-bottom: 0.5rem;">NeuroForge Studio</h1>
+        <p class="text-muted text-lg mb-3">Enterprise-Grade LLM Orchestration Engine</p>
+        <span class="badge badge-primary px-3 py-1 text-sm">v1.2.0-beta</span>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Mission -->
+        <div class="card white-panel">
+            <h3><i class="fas fa-bullseye text-blue-500"></i> Our Mission</h3>
+            <p class="text-muted">
+                NeuroForge aims to democratize access to advanced AI research by providing a unified, local-first
+                platform for fine-tuning, evaluating, and deploying Large Language Models.
+                We bridge the gap between academic research and production engineering.
+            </p>
+        </div>
+
+        <!-- Credits -->
+        <div class="card white-panel">
+            <h3><i class="fas fa-users text-green-500"></i> Core Team</h3>
+            <div style="display:flex; gap:1rem; align-items:center;">
+                <div class="avatar-circle" style="width:48px; height:48px; font-size:1.2rem;">AD</div>
+                <div>
+                    <div style="font-weight:600;">Admin User</div>
+                    <div class="text-xs text-muted">Lead Architect</div>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-slate-100">
+                <div class="text-sm text-muted">Contributors: <strong>Open Source Community</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card white-panel mt-4">
+        <h3 class="mb-4">Technology Stack</h3>
+        <div class="grid-stack">
+            <div class="stack-item"><i class="fab fa-python text-yellow-500"></i>Python 3.10</div>
+            <div class="stack-item"><i class="fas fa-fire text-red-500"></i>PyTorch 2.1</div>
+            <div class="stack-item"><i class="fas fa-server text-gray-700"></i>Flask</div>
+            <div class="stack-item"><i class="fab fa-js text-yellow-400"></i>Vanilla JS</div>
+            <div class="stack-item"><i class="fas fa-database text-blue-400"></i>SQLite</div>
+            <div class="stack-item"><i class="fas fa-microchip text-green-600"></i>CUDA 12.1</div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5 text-muted text-sm">
+        &copy; 2025 NeuroForge AI Labs. All rights reserved.<br>
+        <a href="#" class="text-blue-500 hover:underline">Privacy Policy</a> &bull; <a href="#"
+            class="text-blue-500 hover:underline">Terms of Service</a>
+    </div>
+</div>
+{% endblock %}

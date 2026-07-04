@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - NeuroForge{% endblock %}
+{% block breadcrumbs %}Features / Chat Interface{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/chat.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/chat_additions.css') }}">
+<!-- SimpleMarkdown & Highlight.js for rich text support -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<!-- Mermaid.js for Charts -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="chat-layout animate-fade-in">
+    <!-- Configuration Sidebar -->
+    <div class="chat-config-sidebar custom-scrollbar">
+        <div class="sidebar-section">
+            <div class="section-header">
+                <h3><i class="fas fa-history"></i> Recent Chats</h3>
+                <button id="new-chat-sidemenu-btn" class="icon-btn" title="New Chat">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div id="chat-history-list" class="history-list">
+                <div class="history-placeholder text-muted">No recent chats</div>
+            </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-section">
+            <h3><i class="fas fa-sliders-h"></i> Model Config</h3>
+
+            <div class="config-card">
+                <div class="config-group">
+                    <label>Active Model</label>
+                    <select class="form-select">
+                        <option>Llama-3-8B-Instruct</option>
+                        <option>Mistral-7B-v0.3</option>
+                    </select>
+                </div>
+
+                <div class="config-group toggle-group">
+                    <div class="toggle-info">
+                        <label for="incognito-toggle">Incognito Mode</label>
+                        <small class="text-muted">Don't save history</small>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="incognito-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <div class="config-group toggle-group">
+                    <div class="toggle-info">
+                        <label for="rag-toggle">Knowledge Base</label>
+                        <small class="text-muted">Use RAG context</small>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="rag-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <div class="config-group">
+                    <label>System Prompt</label>
+                    <button class="btn small secondary full-width" id="sys-prompt-toggle">
+                        <i class="fas fa-edit"></i> Edit Prompt
+                    </button>
+                </div>
+            </div>
+
+            <details class="advanced-settings card-flat mt-4">
+                <summary>Parameters</summary>
+                <div class="config-group mt-2">
+                    <label>Temperature (<span id="temp-val">0.7</span>)</label>
+                    <input type="range" id="temp-slider" min="0" max="2" step="0.1" value="0.7">
+                </div>
+                <div class="config-group">
+                    <label>Max Tokens</label>
+                    <input type="number" id="max-tokens" class="form-input" value="2048">
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <!-- Main Chat Container -->
+    <div class="chat-container">
+        <div class="chat-header glass-header">
+            <div class="header-info">
+                <span class="status-dot online"></span>
+                <div class="model-meta">
+                    <span class="model-name-display">Llama-3-8B-Instruct</span>
+                    <span class="chat-status text-muted">Ready to infer</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn small secondary" id="export-chat-btn"><i class="fas fa-download"></i> Export</button>
+            </div>
+        </div>
+
+        <div class="chat-messages custom-scrollbar" id="chat-messages">
+            <div class="message system">
+                <div class="message-content">
+                    <div class="avatar"><i class="fas fa-robot"></i></div>
+                    <div class="bubble glass-panel">
+                        <p>System ready. Loaded <strong>Llama-3-8B-Instruct</strong>.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="message user">
+                <div class="message-content">
+                    <div class="bubble primary-gradient">
+                        <p>Hello, how are you?</p>
+                    </div>
+                    <!-- Avatar or User Icon removed for cleaner look, or kept on right -->
+                </div>
+            </div>
+            <div class="message assistant">
+                <div class="message-content">
+                    <div class="avatar"><i class="fas fa-brain"></i></div>
+                    <div class="bubble white-panel">
+                        <p>I am functioning efficiently. How can I assist you with your models today?</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="file-preview-area" class="file-preview-area"></div>
+
+        <div class="chat-input-wrapper">
+            <div class="chat-input-area glass-panel">
+                <button class="btn icon-only" id="attach-btn" title="Attach Files"><i
+                        class="fas fa-paperclip"></i></button>
+                <textarea placeholder="Type a message..." class="chat-input" rows="1"></textarea>
+                <button class="btn primary icon-only" id="send-btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+            <div class="input-footer text-muted">
+                <small>AI can make mistakes. Please verify important information.</small>
+            </div>
+        </div>
+
+        <input type="file" id="file-input" multiple style="display: none;">
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/chat.js') }}"></script>
+{% endblock %}

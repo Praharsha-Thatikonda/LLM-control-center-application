@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NeuroForge{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <i class="fas fa-brain fa-lg"></i>
+                </div>
+                <div class="brand-text">
+                    <h2>NeuroForge</h2>
+                    <span class="badge badge-xs badge-primary">PRO</span>
+                </div>
+            </div>
+
+            <div class="sidebar-scroll-area">
+                <nav class="nav-menu">
+                    <div class="nav-label">Main</div>
+                    <a href="{{ url_for('index') }}"
+                        class="nav-item {% if request.endpoint == 'index' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('chat_page') }}"
+                        class="nav-item {% if request.endpoint == 'chat_page' %}active{% endif %}">
+                        <i class="fas fa-comments"></i> <span>Chat Interface</span>
+                    </a>
+
+                    <div class="nav-label">Studio</div>
+                    <a href="{{ url_for('models_page') }}"
+                        class="nav-item {% if request.endpoint == 'models_page' %}active{% endif %}">
+                        <i class="fas fa-cube"></i> <span>Model Registry</span>
+                    </a>
+                    <a href="{{ url_for('datasets_page') }}"
+                        class="nav-item {% if request.endpoint == 'datasets_page' %}active{% endif %}">
+                        <i class="fas fa-database"></i> <span>Data Hub</span>
+                    </a>
+                    <a href="{{ url_for('training_page') }}"
+                        class="nav-item {% if request.endpoint == 'training_page' %}active{% endif %}">
+                        <i class="fas fa-dumbbell"></i> <span>Training Lab</span>
+                    </a>
+                    <a href="{{ url_for('workflow_page') }}"
+                        class="nav-item {% if request.endpoint == 'workflow_page' %}active{% endif %}">
+                        <i class="fas fa-project-diagram"></i> <span>Agent Builder</span>
+                    </a>
+                    <a href="{{ url_for('evaluation_page') }}"
+                        class="nav-item {% if request.endpoint == 'evaluation_page' %}active{% endif %}">
+                        <i class="fas fa-chart-bar"></i> <span>Evaluation</span>
+                    </a>
+
+                    <div class="nav-label">System</div>
+                    <a href="{{ url_for('monitoring_page') }}"
+                        class="nav-item {% if request.endpoint == 'monitoring_page' %}active{% endif %}">
+                        <i class="fas fa-stethoscope"></i> <span>Monitoring</span>
+                    </a>
+                    <a href="{{ url_for('settings_page') }}"
+                        class="nav-item {% if request.endpoint == 'settings_page' %}active{% endif %}">
+                        <i class="fas fa-cog"></i> <span>Settings</span>
+                    </a>
+
+                    <div class="nav-label">Support</div>
+                    <a href="{{ url_for('help_page') }}"
+                        class="nav-item {% if request.endpoint == 'help_page' %}active{% endif %}">
+                        <i class="fas fa-question-circle"></i> <span>Help Center</span>
+                    </a>
+                    <a href="{{ url_for('blog_page') }}"
+                        class="nav-item {% if request.endpoint == 'blog_page' %}active{% endif %}">
+                        <i class="fas fa-blog"></i> <span>Community Blog</span>
+                    </a>
+                    <a href="{{ url_for('about_page') }}"
+                        class="nav-item {% if request.endpoint == 'about_page' %}active{% endif %}">
+                        <i class="fas fa-info-circle"></i> <span>About</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-footer">
+                    <a href="{{ url_for('profile_page') }}" class="user-mini-profile"
+                        style="text-decoration: none; color: inherit;">
+                        <div class="avatar-circle">AD</div>
+                        <div class="user-info">
+                            <span class="username">Admin User</span>
+                            <span class="role">Administrator</span>
+                        </div>
+                    </a>
+                    <a href="{{ url_for('login_page') }}" class="btn-icon-only" title="Sign Out">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="breadcrumbs">
+                    {% block breadcrumbs %}System / Dashboard{% endblock %}
+                </div>
+                <div class="system-stats">
+                    <span class="stat-item"><i class="fas fa-memory"></i> VRAM: <strong>24%</strong></span>
+                    <span class="stat-item"><i class="fas fa-microchip"></i> GPU: <strong>45°C</strong></span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
